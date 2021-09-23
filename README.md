@@ -11,11 +11,12 @@ What works now is full functionality of framework, but we are limited only for W
 
 Complete list of steps:
 1. Manual install of Python3 and pip
-2. Manual update of file start.bat and makeItWork.bat
-3. Open console and run makeItWork.bat
+2. Manual update of file start.bat and makeItWork.bat. This step is important only when the python3 in not in system path.
+3. Run makeItWork.bat
   1. First is install or find tools in the system.
   2. Download and compile library(automated)
   3. Configure init file for test(automated)
+4. Run start.bat
 
 
 ## Python installation
@@ -27,7 +28,7 @@ https://www.python.org/downloads/
 ## CMake installation
 Framework should be(in future) multiplatform and compiler independent. That is
 why we decide to use CMake for generating makefiles. During setup script user is
-asked if CMake is already installed. When you allow that is try to download
+asked if CMake is already installed. When you allow that. It tries to download
 and install it.
 https://github.com/Kitware/CMake/releases/download/v3.20.3/cmake-3.20.3-windows-x86_64.msi
 
@@ -58,7 +59,8 @@ Currently we use only this Framework
 Is intended to allow this.
 
 ## C# testing
-Ideas about how to allow use this framework as C# TDD framework
+C# is impossible to use now.
+Ideas about how to allow use this framework as C# TDD framework.
 ### C# compilator
 For platform independency is smart to use mono Compiler, but with MSVC compatible configuration.
 https://www.mono-project.com/

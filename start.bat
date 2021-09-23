@@ -30,10 +30,14 @@ REM # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF T
 REM # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 REM ##################################################################################
 
-REM Next commented line is for case that python is missing in your PATH
-
-PATH=%PATH%;C:\Users\z003ukaz\AppData\Local\Programs\Python\Python39\
-PATH=%PATH%;C:\Users\z003ukaz\AppData\Local\Programs\Python\Python39\Scripts
+REM ##################################################################################
+REM EDIT HERE PLEASE
+REM ##################################################################################
+REM If you do not have python3 in path uncomment and fill correctly next two lines
+REM PATH=%PATH%;ABSOLUT_PATH_TO_PYTHON3\
+REM PATH=%PATH%;ABSOLUT_PATH_TO_PYTHON3\Scripts
+REM ##################################################################################
+REM ##################################################################################
 
 
 where /q python
