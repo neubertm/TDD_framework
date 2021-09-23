@@ -11,3 +11,4 @@ __pycache__
 ideas/*
 debug.log
 project.ini
+envPath.ini
