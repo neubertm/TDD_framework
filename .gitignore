@@ -1,0 +1,12 @@
+*.exe
+TESTs/*_Tpkg/msvc_*
+TESTs/*_Tpkg/mingw_*
+TESTs/*_Tpkg/gcc_*
+TESTs/*_Tpkg/build
+TESTs/*_Tpkg/*_build
+TESTs/*_Tpkg/*_tmp
+TESTs/*_Tpkg/*.cmake
+Tools/*/
+__pycache__
+ideas/*
+debug.log
