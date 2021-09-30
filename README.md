@@ -58,6 +58,34 @@ Currently we use only this Framework
 ### GoogleTest
 Is intended to allow this.
 
+
+## TODO list
+1. Python code refactorization:
+  1. Better class organization
+  2. Better naming
+  3. Hide all python code to specific folder
+  4. Check that all works independently to OS
+2. Allow more compilers and make tools
+3. Allow to use more utest libraries (gtest)
+4. Improve configuration script
+5. Create pip package for simple installation
+6. Implement check for correct code formatting (clang)
+7. Add another static analysis from clang
+8. Create connector for PC-lint as static analysis tool
+9. Rewrite test runner that each step is running independently, subprocess.call -> subprocess.Popen and check when is terminated.
+10. Support Python testing
+  1. Choose one(unittest,...)
+  2. Test framework by itself
+11. Write tool for automatical generation of mock. (Dangerouse because you loose motivation keep minimal implementation.)
+12. Run cpputest on target:
+  1. Compile cpputest for target, add implementation of new operator
+  2. Simple python app for reading Uart > redirection to file
+  3. Evaluation of output file
+13. Add more statics about code, multimetric package and configuration for that
+14. Add precise configuration of showed tables. For summary test.
+
+
+
 ## C# testing
 C# is impossible to use now.
 Ideas about how to allow use this framework as C# TDD framework.
