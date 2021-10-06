@@ -43,6 +43,6 @@ IF ERRORLEVEL 1 (
     ECHO Python exists. Let's go!
 )
 
-cd %~dp0 && python Tools\makeItWork.py
+cd %~dp0 && python Tools/makeItWork/src/makeItWork.py
 
 pause
