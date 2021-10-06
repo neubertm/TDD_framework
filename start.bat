@@ -30,21 +30,13 @@ REM # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF T
 REM # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 REM ##################################################################################
 
-REM ##################################################################################
-REM EDIT HERE PLEASE
-REM ##################################################################################
-REM If you do not have python3 in path uncomment and fill correctly next two lines
-REM PATH=%PATH%;ABSOLUT_PATH_TO_PYTHON3\
-REM PATH=%PATH%;ABSOLUT_PATH_TO_PYTHON3\Scripts
-REM ##################################################################################
-REM ##################################################################################
-
+call winEnvCfg.bat
 
 where /q python
 IF ERRORLEVEL 1 (
     ECHO The python is missing in path. Ensure it is installed and placed in your PATH.
     ECHO If you know where is your python installed but you do not want to update your PATH:
-    ECHO Please open this start.bat and edit line two and fill correct position for python.exe
+    ECHO Please open this winEnvCfg.bat and edit two lines and fill correct position for python.exe
     pause
     EXIT /B
 ) ELSE (
