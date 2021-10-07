@@ -6,7 +6,9 @@ TESTs/*_Tpkg/build
 TESTs/*_Tpkg/*_build
 TESTs/*_Tpkg/*_tmp
 TESTs/*_Tpkg/*.cmake
-Tools/*/
+Tools/Downloads
+Tools/makeItWorkTmp
+Tools/TestConfigs
 __pycache__
 ideas/*
 debug.log
