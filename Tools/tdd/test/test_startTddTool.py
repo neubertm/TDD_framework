@@ -1,4 +1,5 @@
 from .context import startTddTool
+from .context import mainMenu
 
 
 import unittest
@@ -13,9 +14,11 @@ class TestStartTddTool(unittest.TestCase):
     def test_main_emptyArgs(self):
         test_sriptFldrPath = os.path.dirname(__file__)
         test_envIniFilePath = os.path.abspath(os.path.join(test_sriptFldrPath, 'ini_files', 'envPath.ini'))
-        testargs = ['prog', test_envIniFilePath]
+        test_testSetupFilePath = os.path.abspath(os.path.join(test_sriptFldrPath, 'ini_files', 'testSetups.ini'))
+        testargs = ['prog', test_envIniFilePath, test_testSetupFilePath]
         with patch.object(sys, 'argv', testargs):
-            startTddTool.main()
+            with patch("mainMenu.MainMenu.createAndShow") as mock_createAndShow:
+                startTddTool.main()
         pass
 
 
