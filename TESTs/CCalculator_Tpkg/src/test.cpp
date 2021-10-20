@@ -89,3 +89,19 @@ TEST(CCalculator, TestGetResult)
   CHECK_EQUAL(4, result);
   //CHECK_EQUAL(3, result);
 }
+
+//TEST(CCalculator, TestDivide2)
+//{
+//	// SUT
+//    CCalculator Calculator;
+//
+//	float a = 3.0F;
+//	float b = 1.5F;
+//	float result = 2.0F;
+//
+//	// call method
+//	float fres = Calculator.divide(a, b);
+//
+//	// check result
+//    DOUBLES_EQUAL(fres, result, 0.15);
+//}
