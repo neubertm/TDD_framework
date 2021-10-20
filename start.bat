@@ -30,13 +30,19 @@ REM # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF T
 REM # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 REM ##################################################################################
 
+if not exist winEnvCfg.bat (
+  echo First run:
+  echo     Creating winEnvCfg.bat file. Probably you have to fill it.
+  echo.
+  cp winEnvCfgTemplate.bat winEnvCfg.bat
+)
 call winEnvCfg.bat
 
 where /q python
 IF ERRORLEVEL 1 (
     ECHO The python is missing in path. Ensure it is installed and placed in your PATH.
     ECHO If you know where is your python installed but you do not want to update your PATH:
-    ECHO Please open this winEnvCfg.bat and edit two lines and fill correct position for python.exe
+    ECHO Please open this winEnvCfg.bat and edit two lines and fill correct position for python3.exe
     pause
     EXIT /B
 ) ELSE (
