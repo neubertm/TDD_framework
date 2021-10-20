@@ -34,7 +34,7 @@ if not exist winEnvCfg.bat (
   echo First run:
   echo     Creating winEnvCfg.bat file. Probably you have to fill it.
   echo.
-  cp winEnvCfgTemplate.bat winEnvCfg.bat
+  copy winEnvCfgTemplate.bat winEnvCfg.bat
 )
 call winEnvCfg.bat
 
