@@ -1,5 +1,6 @@
 #include "CircBuff.hpp"
 
+// this line is a reference to possible template instance
 template class CircBuff<uint8_t,10>;
 
 template <class T, int N>
@@ -16,25 +17,6 @@ CircBuff< T, N>::~CircBuff()
 }
 
 template <class T, int N>
-void CircBuff< T, N>::push(const T value)
-{
-  // Write byte into buffer
-  a_mBuffer[i32_mHead] = value;
-
-  // If head is going out of range
-  if (i32_mHead  >= ci32_mMaxBufferContent)
-  {
-      // Wrap around
-      i32_mHead = 0;
-  }
-  else
-  {
-      i32_mHead++;
-  }
-}
-
-
-template <class T, int N>
 bool CircBuff< T, N>::push(const T T_array[], int32_t i32_len)
 {
   bool b_lRetVal = false;
@@ -43,11 +25,17 @@ bool CircBuff< T, N>::push(const T T_array[], int32_t i32_len)
       // Copy buffer over with this loop
       for (int i = 0; i < i32_len; i++)
       {
-          push(T_array[i]);
+          add(T_array[i]);
       }
       b_lRetVal = true;
   }
   return b_lRetVal;
+}
+
+template <class T, int N>
+bool CircBuff< T, N>::push(const T T_value)
+{
+	return push(&T_value, 1);
 }
 
 template <class T, int N>
@@ -75,4 +63,22 @@ template <class T, int N>
 bool CircBuff< T, N>::isNonEmpty() const
 {
   return i32_mTail != i32_mHead;
+}
+
+template <class T, int N>
+void CircBuff< T, N>::add(const T value)
+{
+  // Write byte into buffer
+  a_mBuffer[i32_mHead] = value;
+
+  // If head is going out of range
+  if (i32_mHead  >= ci32_mMaxBufferContent)
+  {
+      // Wrap around
+      i32_mHead = 0;
+  }
+  else
+  {
+      i32_mHead++;
+  }
 }

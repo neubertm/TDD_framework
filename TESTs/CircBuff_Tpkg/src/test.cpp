@@ -6,11 +6,11 @@
 #include "CppUTestExt/MockSupport.h"
 #include "CppUTest/MemoryLeakDetectorNewMacros.h"
 
-class CBuff: public CircBuff<uint8_t, 10>
+class CBuff10: public CircBuff<uint8_t, 10>
 {
 public:
-  CBuff(){}
-  ~CBuff(){}
+  CBuff10(){}
+  ~CBuff10(){}
 };
 
 
@@ -51,19 +51,19 @@ IGNORE_TEST(CircBuff, TemplateIgnoredTestWithHelp)
 	*/
 }
 
-TEST(CircBuff, DerivedCircBuffer)
+TEST(CircBuff, CircBuffer_can_be_derived)
 {
-  CBuff o_cb;
+  CBuff10 o_cb;
 }
 
-TEST(CircBuff, CreateCircBuffer)
+TEST(CircBuff, CircBuffer_can_be_created_statically)
 {
 	CircBuff<uint8_t, 10> o_lCB;
 
 	mock().checkExpectations();
 }
 
-TEST(CircBuff, CreateCircBufferDynamic)
+TEST(CircBuff, CircBuffer_can_be_created_dynamically)
 {
 	CircBuff<uint8_t, 10>* po_lCB = new CircBuff<uint8_t, 10>();
 	delete po_lCB;
@@ -72,7 +72,7 @@ TEST(CircBuff, CreateCircBufferDynamic)
 }
 
 
-TEST(CircBuff, CircBufferIsEmptyAfterInitialization)
+TEST(CircBuff, CircBuffer_is_empty_after_initialization)
 {
 	CircBuff<uint8_t, 10> o_lCB;
 
@@ -81,14 +81,58 @@ TEST(CircBuff, CircBufferIsEmptyAfterInitialization)
 	mock().checkExpectations();
 }
 
-TEST(CircBuff, CircBufferPushOneBytePullOneByte)
+TEST(CircBuff, Successfully_pushed_byte_returns_true)
 {
 	CircBuff<uint8_t, 10> o_lCB;
 
+	CHECK_TRUE(o_lCB.push(44));
+
+	mock().checkExpectations();
+}
+
+TEST(CircBuff, CircBuffer_is_not_empty_after_first_push)
+{
+	CircBuff<uint8_t, 10> o_lCB;
+
+	CHECK_TRUE(o_lCB.push(44));
+
+	CHECK_TRUE(o_lCB.isNonEmpty());
+
+	mock().checkExpectations();
+}
+
+TEST(CircBuff, Pushed_one_byte_can_be_pulled_again)
+{
+	CircBuff<uint8_t, 10> o_lCB;
+
+	CHECK_TRUE(o_lCB.push(44));
+
+	uint8_t u8 = o_lCB.pull();
+	
+	CHECK_EQUAL(44, u8);
+
+	mock().checkExpectations();
+}
+
+TEST(CircBuff, after_pulling_the_last_byte_CircBuffer_is_empty_again)
+{
+	CircBuff<uint8_t, 10> o_lCB;
+
+	CHECK_TRUE(o_lCB.push(44));
+
+	o_lCB.pull();
+
 	CHECK_FALSE(o_lCB.isNonEmpty());
 
+	mock().checkExpectations();
+}
+
+TEST(CircBuff, CircBuffer_accepts_array)
+{
+	CircBuff<uint8_t, 10> o_lCB;
+
 	uint8_t array[10] = {1,2,3,4,5,6,7,8,9,10};
-	o_lCB.push(array,1);
+	o_lCB.push(array, 1);
 
 	CHECK_TRUE(o_lCB.isNonEmpty());
 
@@ -100,131 +144,121 @@ TEST(CircBuff, CircBufferPushOneBytePullOneByte)
 	mock().checkExpectations();
 }
 
-TEST(CircBuff, CircBufferPushMaxArray)
+TEST(CircBuff, CircBuffer_rejects_bytes_when_full_without_spoiling_stored_data)
 {
 	CircBuff<uint8_t, 10> o_lCB;
 
 	CHECK_FALSE(o_lCB.isNonEmpty());
 
-  uint8_t array[10] = {1,2,3,4,5,6,7,8,9,10};
-	CHECK_TRUE(o_lCB.push(array,10));
-	//o_lCB.push(5);
+	uint8_t array[10] = {1,2,3,4,5,6,7,8,9,10};
+	CHECK_TRUE(o_lCB.push(array, 10));
+	
+	CHECK_FALSE(o_lCB.push(5));
+	CHECK_FALSE(o_lCB.push(array, 1));
 
 	CHECK_TRUE(o_lCB.isNonEmpty());
-	for(int i = 0;i<10;++i)
-	{
-		CHECK_EQUAL(array[i],o_lCB.pull());
-	}
-
-	mock().checkExpectations();
-}
-
-TEST(CircBuff, CircBufferPushOversizedArray)
-{
-	CircBuff<uint8_t, 10> o_lCB;
-
-	CHECK_FALSE(o_lCB.isNonEmpty());
-
-  uint8_t array[11] = {1,2,3,4,5,6,7,8,9,10,11};
-	CHECK_FALSE(o_lCB.push(array,11));
-	//o_lCB.push(5);
-
-	CHECK_FALSE(o_lCB.isNonEmpty());
-
-	mock().checkExpectations();
-}
-
-TEST(CircBuff, CircBufferFullBuffer)
-{
-	CircBuff<uint8_t, 10> o_lCB;
-
-	CHECK_FALSE(o_lCB.isNonEmpty());
-
-  uint8_t array[11] = {1,2,3,4,5,6,7,8,9,10,11};
-	CHECK_TRUE(o_lCB.push(array,10));
-
-
-	CHECK_FALSE(o_lCB.push(array,1));
-
-	for(int i=0; i<10;++i)
-	{
-		CHECK_TRUE(o_lCB.isNonEmpty());
-		CHECK_EQUAL(array[i], o_lCB.pull());
-	}
-
-	//o_lCB.push(5);
-  CHECK_FALSE(o_lCB.isNonEmpty());
-
-
-	mock().checkExpectations();
-}
-
-TEST(CircBuff, CircBufferFullBufferShiftOne)
-{
-	CircBuff<uint8_t, 10> o_lCB;
-	int32_t i32Tail = 0;
-	int32_t i32Head = 0;
-
-	CHECK_FALSE(o_lCB.isNonEmpty());
-
-  uint8_t array[11] = {1,2,3,4,5,6,7,8,9,10,11};
-
-	CHECK_TRUE(o_lCB.push(array,1));
-	i32Head++;
-	CHECK_EQUAL(array[0], o_lCB.pull());
-	i32Tail++;
-
-	CHECK_TRUE(o_lCB.push(array,10));
-
-
-	CHECK_FALSE(o_lCB.push(array,1));
-
-	for(int i=0; i<10;++i)
-	{
-		CHECK_TRUE(o_lCB.isNonEmpty());
-		CHECK_EQUAL(array[i], o_lCB.pull());
-	}
-
-	//o_lCB.push(5);
-  CHECK_FALSE(o_lCB.isNonEmpty());
-
-	mock().checkExpectations();
-}
-
-TEST(CircBuff, CircBufferPushHalfMaxArrayReadAllAndPushMaxArrayAgain)
-{
-	CircBuff<uint8_t, 10> o_lCB;
-
-	CHECK_FALSE(o_lCB.isNonEmpty());
-
-  uint8_t array[10] = {1,2,3,4,5,6,7,8,9,10};
-	//uint8_t array2[10] = {0};
-	CHECK_TRUE(o_lCB.push(array,5));
-	//o_lCB.push(5);
-
-	CHECK_TRUE(o_lCB.isNonEmpty());
-	for(int i = 0;i<5;++i)
+	
+	for(int i = 0; i<10; ++i)
 	{
 		CHECK_EQUAL(array[i],o_lCB.pull());
 	}
 
 	CHECK_FALSE(o_lCB.isNonEmpty());
+	
+	mock().checkExpectations();
+}
 
+TEST(CircBuff, CircBuffer_rejects_arrays_which_dont_fit_to_free_size)
+{
+	CircBuff<uint8_t, 10> o_lCB;
+
+	CHECK_FALSE(o_lCB.isNonEmpty());
+
+	uint8_t array[11] = {1,2,3,4,5,6,7,8,9,10,11};
+	
+	// buffer size is only 10
+	CHECK_FALSE(o_lCB.push(array, 11));
+
+	// fill buffer partly
+	CHECK_TRUE(o_lCB.push(array, 3));
+	
+	// free buffer size is only 7
+	CHECK_FALSE(o_lCB.push(array, 8));
+
+	// fill the rest of buffer
+	CHECK_TRUE(o_lCB.push(array, 7));
+
+	// no space anymore
+	CHECK_FALSE(o_lCB.push(array, 1));
+
+	mock().checkExpectations();
+}
+
+TEST(CircBuff, buffer_space_can_be_reused)
+{
+	CircBuff<uint8_t, 10> o_lCB;
+
+	CHECK_FALSE(o_lCB.isNonEmpty());
+
+	uint8_t array[10] = {1,2,3,4,5,6,7,8,9,10};
+	
+	// fill buffer completely
 	CHECK_TRUE(o_lCB.push(array,10));
-	CHECK_TRUE(o_lCB.isNonEmpty());
 
-  BYTES_EQUAL(array[0], o_lCB.pull());
-	BYTES_EQUAL(array[1], o_lCB.pull());
-	BYTES_EQUAL(array[2], o_lCB.pull());
-	BYTES_EQUAL(array[3], o_lCB.pull());
-	BYTES_EQUAL(array[4], o_lCB.pull());
-	BYTES_EQUAL(array[5], o_lCB.pull());
-	BYTES_EQUAL(array[6], o_lCB.pull());
-	BYTES_EQUAL(array[7], o_lCB.pull());
-	BYTES_EQUAL(array[8], o_lCB.pull());
-	BYTES_EQUAL(array[9], o_lCB.pull());
+	// pull 3 bytes
+	o_lCB.pull();
+	o_lCB.pull();
+	o_lCB.pull();
+	
+	// fill the free space
+	CHECK_TRUE(o_lCB.push(array, 3));
 
+	// buffer is full again
+	CHECK_FALSE(o_lCB.push(array, 1));
+	
+	// expected buffer content
+	uint8_t expected[10] = {4,5,6,7,8,9,10,1,2,3};
+	
+	for(int i=0; i<10;++i)
+	{
+		CHECK_TRUE(o_lCB.isNonEmpty());
+		CHECK_EQUAL(expected[i], o_lCB.pull());
+	}
 
+	CHECK_FALSE(o_lCB.isNonEmpty());
+
+	mock().checkExpectations();
+}
+
+TEST(CircBuff, buffer_space_can_be_reused_multiple_times)
+{
+	CircBuff<uint8_t, 10> o_lCB;
+	
+	uint8_t array[10] = {1,2,3,4,5,6,7,8,9,10};
+	
+	for (int c = 0; c < 100; c++)
+	{
+		CHECK_FALSE(o_lCB.isNonEmpty());
+
+		CHECK_TRUE(o_lCB.push(array, 3));
+
+		CHECK_TRUE(o_lCB.isNonEmpty());
+		
+		for(int i = 0; i<3; ++i)
+		{
+			CHECK_EQUAL(array[i],o_lCB.pull());
+		}
+
+		CHECK_FALSE(o_lCB.isNonEmpty());
+
+		CHECK_TRUE(o_lCB.push(array,10));
+		CHECK_TRUE(o_lCB.isNonEmpty());
+
+		for(int i = 0; i<10; ++i)
+		{
+			CHECK_EQUAL(array[i],o_lCB.pull());
+		}
+	}
 
 	mock().checkExpectations();
 }
