@@ -1,21 +1,20 @@
 class CCalculator
 {
-	public:
+public:
+  CCalculator();
 
-	CCalculator();
+  ~CCalculator();
 
-	~CCalculator();
+  int getResult(void);
 
-	int getResult(void);
+  int multiply(int a, int b);
 
-	int multiply(int a, int b);
+  void divide(float &a, float &b, float &p_result);
 
-	void divide(float &a, float &b, float &p_result);
+  float divide(const float a, const float b);
 
-	float divide(const float a, const float b);
+  int colatz(int number);
 
-	private:
-
-	int result;
-
+private:
+  int result;
 };

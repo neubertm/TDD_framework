@@ -1,9 +1,10 @@
 #include "Calculator.hpp"
 
-//CppUTest includes should be after your and system includes
+// CppUTest includes should be after your and system includes
+#include "CppUTest/MemoryLeakDetectorNewMacros.h"
 #include "CppUTest/TestHarness.h"
 #include "CppUTestExt/MockSupport.h"
-#include "CppUTest/MemoryLeakDetectorNewMacros.h"
+#include <limits>
 
 using ::CCalculator;
 
@@ -46,62 +47,72 @@ IGNORE_TEST(CCalculator, TemplateIgnoredTestWithHelp)
 
 TEST(CCalculator, TestMultiply)
 {
-	// SUT
-    CCalculator Calculator;
+  // SUT
+  CCalculator Calculator;
 
-	int result = 0;
+  int result = 0;
 
-	// call method
-	result = Calculator.multiply(2, 2);
+  // call method
+  result = Calculator.multiply(2, 2);
 
-	// check result
-    CHECK_EQUAL(4, result);
-}
-
-TEST(CCalculator, TestDivide)
-{
-	// SUT
-    CCalculator Calculator;
-
-	float a = 3.0F;
-	float b = 1.5F;
-	float result = 0.0F;
-
-	// call method
-	Calculator.divide(a, b, result);
-
-	// check result
-    DOUBLES_EQUAL(2.1F, result, 0.15);
-}
-
-TEST(CCalculator, TestGetResult)
-{
-	// SUT
-    CCalculator Calculator;
-
-	int result = 0;
-
-	// call methods
-	Calculator.multiply(2, 2);
-	result = Calculator.getResult();
-
-	// check result
+  // check result
   CHECK_EQUAL(4, result);
-  //CHECK_EQUAL(3, result);
 }
 
-//TEST(CCalculator, TestDivide2)
-//{
-//	// SUT
-//    CCalculator Calculator;
-//
-//	float a = 3.0F;
-//	float b = 1.5F;
-//	float result = 2.0F;
-//
-//	// call method
-//	float fres = Calculator.divide(a, b);
-//
-//	// check result
-//    DOUBLES_EQUAL(fres, result, 0.15);
-//}
+TEST(CCalculator, TestDivide) {
+  // SUT
+  CCalculator Calculator;
+
+  float a = 3.0F;
+  float b = 1.5F;
+  float result = 0.0F;
+
+  // call method
+  Calculator.divide(a, b, result);
+
+  // check result
+  DOUBLES_EQUAL(2.1F, result, 0.15);
+}
+
+TEST(CCalculator, TestGetResult) {
+  // SUT
+  CCalculator Calculator;
+
+  int result = 0;
+
+  // call methods
+  Calculator.multiply(2, 2);
+  result = Calculator.getResult();
+
+  // check result
+  CHECK_EQUAL(4, result);
+  // CHECK_EQUAL(3, result);
+}
+
+TEST(CCalculator, TestDivide2) {
+  // SUT
+  CCalculator Calculator;
+
+  float a = 3.0F;
+  float b = 1.5F;
+  float result = 2.0F;
+
+  // call method
+  float fres = Calculator.divide(a, b);
+
+  // check result
+  DOUBLES_EQUAL(fres, result, 0.15);
+}
+
+// TEST(CCalculator, TestDivide2_zeroDivision) {
+// // SUT
+// CCalculator Calculator;
+// float a = 3.0F;
+// float b = +0.0F;
+// //float result = 5;
+// float result = std::numeric_limits<float>::infinity();
+// // call method
+// float fres = Calculator.divide(a, b);
+// // check result
+// DOUBLES_EQUAL(result, fres, 0.15);
+// }
