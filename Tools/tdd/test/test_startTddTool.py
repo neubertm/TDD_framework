@@ -11,7 +11,7 @@ import os
 
 class TestStartTddTool(unittest.TestCase):
 
-    def test_main_emptyArgs(self):
+    def test_main_twoArgs(self):
         test_sriptFldrPath = os.path.dirname(__file__)
         test_envIniFilePath = os.path.abspath(os.path.join(test_sriptFldrPath, 'ini_files', 'envPath.ini'))
         test_testSetupFilePath = os.path.abspath(os.path.join(test_sriptFldrPath, 'ini_files', 'testSetups.ini'))
@@ -20,6 +20,16 @@ class TestStartTddTool(unittest.TestCase):
             with patch("mainMenu.MainMenu.createAndShow") as mock_createAndShow:
                 startTddTool.main()
         pass
+
+#    def test_main_oneArgs(self):
+#        test_sriptFldrPath = os.path.dirname(__file__)
+#        test_envIniFilePath = os.path.abspath(os.path.join(test_sriptFldrPath, 'ini_files', 'envPath.ini'))
+#        test_testSetupFilePath = os.path.abspath(os.path.join(test_sriptFldrPath, 'ini_files', 'testSetups.ini'))
+#        testargs = ['prog', test_envIniFilePath]
+#        with patch.object(sys, 'argv', testargs):
+#            with patch("mainMenu.MainMenu.createAndShow") as mock_createAndShow:
+#                startTddTool.main()
+#        pass
 
 
 if __name__ == '__main__':

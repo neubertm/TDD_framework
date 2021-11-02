@@ -47,31 +47,35 @@ from mainMenu import MainMenu
 # Section loading Environment path - compilers and other important tool
 
 
+def assertFilePathExists(str_filePath):
+    assert Path(str_filePath).exists(), "Unexisting config file: %s." % (
+                                            str_filePath)
+
+
+def printoutTextWhenDefaultFileIsUsed(str_file,str_type):
+    print("Not enough arguments, we expect cfg file name"
+          + " for environment path.")
+    print("Default name for %s config file will be used: %s" % (str_type,
+                                                                str_file))
+
+
 def main():
     str_envCfgFile = 'envPath.ini'
     arguments = sys.argv[1:]
     if len(arguments) > 0:
         str_envCfgFile = arguments[0]
     else:
-        print("Not enough arguments, we expect cfg file name"
-              + " for environment path.")
-        print("Default name for environment config file will be used: %s" %
-              (str_envCfgFile))
+        printoutTextWhenDefaultFileIsUsed(str_envCfgFile, 'environment')
 
-    assert Path(str_envCfgFile).exists(), "Unexisting config file: %s." % (
-                                            str_envCfgFile)
+    assertFilePathExists(str_envCfgFile)
 
     str_testSetupsFile = 'testSetups.ini'
     if len(arguments) > 1:
         str_testSetupsFile = arguments[1]
     else:
-        print("Not enough arguments, we expect cfg file name"
-              + " file of environment path.")
-        print("Default name for setups config file will be used: %s" %
-              (str_testSetupsFile))
+        printoutTextWhenDefaultFileIsUsed(str_testSetupsFile, 'setups')
 
-    assert Path(str_testSetupsFile).exists(), "Unexisting config file: %s." % (
-                                            str_testSetupsFile)
+    assertFilePathExists(str_testSetupsFile)
 
     # Reading env variables
     co_env = CEnvCfg()
