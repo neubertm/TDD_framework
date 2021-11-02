@@ -51,4 +51,4 @@ IF ERRORLEVEL 1 (
 
 cd %~dp0 && python Tools/tdd/src/startTddTool.py
 
-pause
+REM pause
