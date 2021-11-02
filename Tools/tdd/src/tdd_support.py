@@ -157,6 +157,13 @@ def createCMakeListsFromConfiguration(fileName: str, mainCfg: CMainConfig(), tes
                 ' -pedantic")\n'
             )
             cmFile.write(
+                'SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS}'
+                ' ${GCC_COVERAGE_COMPILE_FLAGS} -Wall -Werror -pedantic")\n'
+            )
+            cmFile.write('set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE ON)\n')
+            cmFile.write('set(CMAKE_C_OUTPUT_EXTENSION_REPLACE ON)\n')
+
+            cmFile.write(
                 "SET( CMAKE_EXE_LINKER_FLAGS  "
                 '"${CMAKE_EXE_LINKER_FLAGS} '
                 '${GCC_COVERAGE_LINK_FLAGS}" )\n\n'

@@ -488,6 +488,7 @@ class CTestPkg():
         else:
             op_testRunLst.append("-v")
             op_testRunLst.append("-c")
+            print(10*'-' + '< ' + self.name + ' >' + 10*'-' + '\n')
 
         subprocess.call(op_testRunLst, shell=True)
 
@@ -689,7 +690,7 @@ class CTestPkg():
     def __writeStep__(self, step: str):
         self.str_step = step
         if not self.b_silent:
-            print(Fore.YELLOW + self.str_step + Style.RESET_ALL)
+            print("\n" + Fore.YELLOW + self.str_step + Style.RESET_ALL)
         pass
 
     def __checkExternalTerminationCondition__(self):
@@ -730,6 +731,10 @@ class CTestPkg():
                 return(True)
         return(False)
 
+    def __cleanScreenBeforeRerun__(self):
+        if not self.b_silent:
+            tdd_support.clear()
+
     def __runTest__(self):
         b_buildStatus = False
         self.__writeStep__("Start")
@@ -760,6 +765,7 @@ class CTestPkg():
                 if self.__checkSrcFileChanged__():
                     self.__cleanStatusVariables__()
                     self.__fileCopyingUpdatedOnly__()
+                    self.__cleanScreenBeforeRerun__()
                     break
 
     def run(self):
