@@ -29,6 +29,7 @@
 ##########################################################################
 
 from tabulate import tabulate
+from colorama import Fore, Style
 
 
 class CodeStatistics:
@@ -69,16 +70,55 @@ def interpretLIZARDoutfile(lizardFileName, codeStat):
     return(errArray)
 
 
-def printLIZARDerrArray(errArray):
+def printLIZARDerrArray(errArray, codeStat):
     header = [
         'NLOC',
-        'CCN',
+        'CCN[<%s]' % codeStat.int_mccabeComplex,
         'tokens',
-        'arg num',
-        'length',
+        'arg num[<%s]' % codeStat.int_paramCnt,
+        'length[<%s]' % codeStat.int_fncLength,
         'file name',
         'fnc name',
         'fnc full name',
         'start',
         'end']
     print(tabulate(errArray, header, tablefmt="pretty"))
+
+def chckCondAndRetColored(str_intVal, intLevel):
+    colorChar = []
+    if int(str_intVal) >= intLevel:
+        colorChar = Fore.RED
+    else:
+        colorChar = Fore.GREEN
+
+    return (colorChar + str_intVal + Style.RESET_ALL)
+
+
+def printLIZARDerrArrayShortAndColor(errArray, codeStat):
+    header = [
+        'CCN[<%s]' % codeStat.int_mccabeComplex,
+        'argn[<%s]' % codeStat.int_paramCnt,
+        'flen[<%s]' % codeStat.int_fncLength,
+        'fnc name',
+        's',
+        'e']
+    printArray = []
+    for errLine in errArray:
+        line = []
+
+        line.append(chckCondAndRetColored(errLine[1],codeStat.int_mccabeComplex))
+
+        line.append(chckCondAndRetColored(errLine[3],codeStat.int_paramCnt))
+
+        line.append(chckCondAndRetColored(errLine[4],codeStat.int_fncLength))
+
+        # fnc name
+        line.append(errLine[6])
+
+        # fnc start end
+        line.append(errLine[8])
+        line.append(errLine[9])
+
+        printArray.append(line)
+
+    print(tabulate(printArray, header, tablefmt="pretty"))

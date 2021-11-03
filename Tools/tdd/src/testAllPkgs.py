@@ -621,6 +621,12 @@ class CTestPkg():
 
             if not self.b_silent:
                 print("Number of static check errors: ", self.str_analysis)
+                if numOfError:
+                    numL = 40
+                    print(numL*'-' + '\n')
+                    with open(check_err, 'r') as fin:
+                        print(fin.read())
+                    print(numL*'-')
         else:
             self.str_analysis = Fore.YELLOW + "OFF" + Style.RESET_ALL
 
@@ -667,6 +673,8 @@ class CTestPkg():
             self.str_complexity += str(cntError) + Style.RESET_ALL
             if not self.b_silent:
                 print("Code analysis error cnt: ", self.str_complexity)
+                if cntError:
+                    CodeStatistics.printLIZARDerrArrayShortAndColor(errTab, self.mCfg.co_stat)
         else:
             self.str_complexity = Fore.YELLOW + "OFF" + Style.RESET_ALL
 
