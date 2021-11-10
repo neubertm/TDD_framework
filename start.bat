@@ -34,9 +34,22 @@ if not exist winEnvCfg.bat (
   echo First run:
   echo     Creating winEnvCfg.bat file. Probably you have to fill it.
   echo.
-  copy winEnvCfgTemplate.bat winEnvCfg.bat
+  copy Tools\defaults\winEnvCfgTemplate.bat winEnvCfg.bat
 )
 call winEnvCfg.bat
+
+rem Check if TestConfigs folder exists, if not create it.
+if not exist Tools\TestConfigs\ (
+  mkdir Tools\TestConfigs
+)
+
+if not exist Tools\TestConfigs\default.tcfg (
+  copy Tools\defaults\default.tcfg Tools\TestConfigs\default.tcfg
+)
+
+if not exist testSetups.ini (
+  copy Tools\defaults\testSetupsTemplate.ini testSetups.ini
+)
 
 where /q python
 IF ERRORLEVEL 1 (
