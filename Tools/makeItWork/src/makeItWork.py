@@ -976,7 +976,7 @@ print(Fore.MAGENTA + "Downloading unpacking & compiling testing libraries.")
 for sw in ST_list:
     # print(sw.str_pathInSystem)
     head, tail = os.path.split(sw.str_pathInSystem)
-    os.environ['PATH'] += ";" + head
+    os.environ['PATH'] = head + ";" + os.environ['PATH']
 
 swPathDict = {sw.str_appName: os.path.split(sw.str_pathInSystem)[
     0] for sw in ST_list}

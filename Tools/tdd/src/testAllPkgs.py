@@ -53,9 +53,9 @@ def testOnePkg(pckgDir, mCfg):
     kpt = KeyPressThread.KeyboardThread()
 
     env_bckp = os.environ.copy()
-    os.environ['PATH'] += ";" + mCfg.co_env.str_cmake
-    os.environ['PATH'] += ";" + mCfg.co_env.str_mingw
-    os.environ['PATH'] += ";" + mCfg.co_env.str_cppcheck
+    os.environ['PATH'] = mainCfg.co_env.str_cmake + ";" + os.environ['PATH']
+    os.environ['PATH'] = mainCfg.co_env.str_mingw + ";" + os.environ['PATH']
+    os.environ['PATH'] = mainCfg.co_env.str_cppcheck + ";" + os.environ['PATH']
 
     str_testPackagesPath = mCfg.co_pkg.str_testpath
     str_testPackageSuffix = mCfg.co_pkg.str_testfldr_suffix
@@ -98,9 +98,9 @@ def debug(lstPackage, mainCfg):
 def tests_minimized(lstPackage, mainCfg):
     colorama.init()
     env_bckp = os.environ.copy()
-    os.environ['PATH'] += ";" + mainCfg.co_env.str_cmake
-    os.environ['PATH'] += ";" + mainCfg.co_env.str_mingw
-    os.environ['PATH'] += ";" + mainCfg.co_env.str_cppcheck
+    os.environ['PATH'] = mainCfg.co_env.str_cmake + ";" + os.environ['PATH']
+    os.environ['PATH'] = mainCfg.co_env.str_mingw + ";" + os.environ['PATH']
+    os.environ['PATH'] = mainCfg.co_env.str_cppcheck + ";" + os.environ['PATH']
 
     kpt = KeyPressThread.KeyboardThread()
 
@@ -220,9 +220,9 @@ def tests(lstPackage, mainCfg):
     # print(lstPackage)
     # debug(lstPackage, mainCfg)
     env_bckp = os.environ.copy()
-    os.environ['PATH'] += ";" + mainCfg.co_env.str_cmake
-    os.environ['PATH'] += ";" + mainCfg.co_env.str_mingw
-    os.environ['PATH'] += ";" + mainCfg.co_env.str_cppcheck
+    os.environ['PATH'] = mainCfg.co_env.str_cmake + ";" + os.environ['PATH']
+    os.environ['PATH'] = mainCfg.co_env.str_mingw + ";" + os.environ['PATH']
+    os.environ['PATH'] = mainCfg.co_env.str_cppcheck + ";" + os.environ['PATH']
 
     kpt = KeyPressThread.KeyboardThread()
 

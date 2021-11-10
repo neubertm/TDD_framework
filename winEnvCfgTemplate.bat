@@ -35,7 +35,7 @@ REM EDIT HERE PLEASE
 REM Note: If you do not have python3 in path uncomment next three lines and fill path to your python3
 REM ##################################################################################
 REM set PYTHON3_PATH=FILL_ABSOLUTH_PATH_TO_YOUR_PYTHON3
-REM PATH=%PATH%;%PYTHON3_PATH%
-REM PATH=%PATH%;%PYTHON3_PATH%\Scripts
+REM PATH=%PYTHON3_PATH%;%PATH%
+REM PATH=%PYTHON3_PATH%\Scripts;%PATH%
 REM ##################################################################################
 REM ##################################################################################
