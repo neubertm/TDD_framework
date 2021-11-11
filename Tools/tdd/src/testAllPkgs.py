@@ -53,9 +53,9 @@ def testOnePkg(pckgDir, mCfg):
     kpt = KeyPressThread.KeyboardThread()
 
     env_bckp = os.environ.copy()
-    os.environ['PATH'] = mainCfg.co_env.str_cmake + ";" + os.environ['PATH']
-    os.environ['PATH'] = mainCfg.co_env.str_mingw + ";" + os.environ['PATH']
-    os.environ['PATH'] = mainCfg.co_env.str_cppcheck + ";" + os.environ['PATH']
+    os.environ['PATH'] = mCfg.co_env.str_cmake + ";" + os.environ['PATH']
+    os.environ['PATH'] = mCfg.co_env.str_mingw + ";" + os.environ['PATH']
+    os.environ['PATH'] = mCfg.co_env.str_cppcheck + ";" + os.environ['PATH']
 
     str_testPackagesPath = mCfg.co_pkg.str_testpath
     str_testPackageSuffix = mCfg.co_pkg.str_testfldr_suffix
@@ -490,15 +490,22 @@ class CTestPkg():
             op_testRunLst.append("-c")
             print(10*'-' + '< ' + self.name + ' >' + 10*'-' + '\n')
 
-        subprocess.call(op_testRunLst, shell=True)
+        intRetVal = subprocess.call(op_testRunLst, shell=True)
 
         if self.b_silent:
-            testResult = tdd_support.interpretCPPUTESToutput(outF)
+            testResult = 0
+            if intRetVal == 0 :
+                testResult = tdd_support.interpretCPPUTESToutput(outF)
             if testResult:
                 self.str_testStatus = Fore.GREEN + "Pass" + Style.RESET_ALL
             else:
                 self.str_testStatus = Fore.RED + "Fail" + Style.RESET_ALL
                 bRetVal = False
+        else:
+            if intRetVal != 0:
+                print(Fore.RED + 'Something is rotten in (Denmark) that code.')
+                print('Test application terminate with this error: %i' % intRetVal)
+                print(Style.RESET_ALL)
         return(bRetVal)
 
     def __coverage__(self, sutList: [str], silent=True):
