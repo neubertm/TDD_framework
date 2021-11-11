@@ -694,7 +694,7 @@ class CTestPkg():
                 self.str_complexity = Fore.GREEN
             self.str_complexity += str(cntError) + Style.RESET_ALL
             if not self.b_silent:
-                print("Code analysis error cnt: ", self.str_complexity)
+                print("Number of error functions: ", self.str_complexity)
                 if cntError:
                     CodeStatistics.printLIZARDerrArrayShortAndColor(errTab,
                             int_McCabeCompl, int_ParCnt, int_FncLen)
