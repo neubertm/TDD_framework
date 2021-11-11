@@ -494,7 +494,7 @@ class CTestPkg():
 
         if self.b_silent:
             testResult = 0
-            if intRetVal == 0 :
+            if intRetVal > 1 :
                 testResult = tdd_support.interpretCPPUTESToutput(outF)
             if testResult:
                 self.str_testStatus = Fore.GREEN + "Pass" + Style.RESET_ALL
@@ -502,8 +502,8 @@ class CTestPkg():
                 self.str_testStatus = Fore.RED + "Fail" + Style.RESET_ALL
                 bRetVal = False
         else:
-            if intRetVal != 0:
-                print(Fore.RED + 'Something is rotten in (Denmark) that code.')
+            if intRetVal > 1:
+                print(Fore.RED + '\nSomething is rotten in (Denmark) that code.')
                 print('Test application terminate with this error: %i' % intRetVal)
                 print(Style.RESET_ALL)
         return(bRetVal)
@@ -645,19 +645,34 @@ class CTestPkg():
             lizard_out = str(self.path_buildFldr / "lizard.out")
             lizard_err = str(self.path_buildFldr / "lizard.err")
 
+            # choose used parameters
+            if self.tCfg.co_codeStatistics.isUsedTestSpecificOnly == True:
+                int_McCabeCompl = self.tCfg.co_codeStatistics.int_mccabeComplex
+                int_FncLen = self.tCfg.co_codeStatistics.int_fncLength
+                int_ParCnt = self.tCfg.co_codeStatistics.int_paramCnt
+            else:
+                if self.tCfg.co_codeStatistics.isUsedStricter == True:
+                    int_McCabeCompl = min(self.tCfg.co_codeStatistics.int_mccabeComplex, self.mCfg.co_stat.int_mccabeComplex)
+                    int_FncLen = min(self.tCfg.co_codeStatistics.int_fncLength, self.mCfg.co_stat.int_fncLength)
+                    int_ParCnt = min(self.tCfg.co_codeStatistics.int_paramCnt, self.mCfg.co_stat.int_paramCnt)
+                else:
+                    int_McCabeCompl = self.mCfg.co_stat.int_mccabeComplex
+                    int_FncLen = self.mCfg.co_stat.int_fncLength
+                    int_ParCnt = self.mCfg.co_stat.int_paramCnt
+
             op_lst = []
             op_lst.append('lizard')
             for sutListItem in sutList:
                 op_lst.append(str(self.path_buildFldr / sutListItem))
 
             op_lst.append("-C")
-            op_lst.append(str(self.mCfg.co_stat.int_mccabeComplex))
+            op_lst.append(str(int_McCabeCompl))
 
             op_lst.append("-L")
-            op_lst.append(str(self.mCfg.co_stat.int_fncLength))
+            op_lst.append(str(int_FncLen))
 
             op_lst.append("-a")
-            op_lst.append(str(self.mCfg.co_stat.int_paramCnt))
+            op_lst.append(str(int_ParCnt))
 
             op_lst.append("-o")
             op_lst.append(lizardCsv)
@@ -671,7 +686,7 @@ class CTestPkg():
             subprocess.call(op_lst, shell=True)
 
             errTab = CodeStatistics.interpretLIZARDoutfile(
-                lizardCsv, self.mCfg.co_stat)
+                lizardCsv, int_McCabeCompl, int_ParCnt, int_FncLen)
             cntError = len(errTab)
             if cntError:
                 self.str_complexity = Fore.RED
@@ -681,7 +696,8 @@ class CTestPkg():
             if not self.b_silent:
                 print("Code analysis error cnt: ", self.str_complexity)
                 if cntError:
-                    CodeStatistics.printLIZARDerrArrayShortAndColor(errTab, self.mCfg.co_stat)
+                    CodeStatistics.printLIZARDerrArrayShortAndColor(errTab,
+                            int_McCabeCompl, int_ParCnt, int_FncLen)
         else:
             self.str_complexity = Fore.YELLOW + "OFF" + Style.RESET_ALL
 

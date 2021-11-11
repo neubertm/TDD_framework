@@ -60,23 +60,23 @@ def readLIZARDoutfile(lizardFileName):
     return(array)
 
 
-def interpretLIZARDoutfile(lizardFileName, codeStat):
+def interpretLIZARDoutfile(lizardFileName, int_complex, int_parCnt, int_fncLen):
     resArray = readLIZARDoutfile(lizardFileName)
     errArray = []
     for dtaLine in resArray:
-        if (int(dtaLine[1]) >= codeStat.int_mccabeComplex) or (
-                int(dtaLine[3]) >= codeStat.int_paramCnt) or (int(dtaLine[4]) >= codeStat.int_fncLength):
+        if (int(dtaLine[1]) >= int_complex) or (
+                int(dtaLine[3]) >= int_parCnt) or (int(dtaLine[4]) >= int_fncLen):
             errArray.append(dtaLine)
     return(errArray)
 
 
-def printLIZARDerrArray(errArray, codeStat):
+def printLIZARDerrArray(errArray, int_complex, int_parCnt, int_fncLen):
     header = [
         'NLOC',
-        'CCN[<%s]' % codeStat.int_mccabeComplex,
+        'CCN[<%s]' % int_complex,
         'tokens',
-        'arg num[<%s]' % codeStat.int_paramCnt,
-        'length[<%s]' % codeStat.int_fncLength,
+        'arg num[<%s]' % int_parCnt,
+        'length[<%s]' % int_fncLen,
         'file name',
         'fnc name',
         'fnc full name',
@@ -94,11 +94,11 @@ def chckCondAndRetColored(str_intVal, intLevel):
     return (colorChar + str_intVal + Style.RESET_ALL)
 
 
-def printLIZARDerrArrayShortAndColor(errArray, codeStat):
+def printLIZARDerrArrayShortAndColor(errArray, int_complex, int_parCnt, int_fncLen):
     header = [
-        'CCN[<%s]' % codeStat.int_mccabeComplex,
-        'argn[<%s]' % codeStat.int_paramCnt,
-        'flen[<%s]' % codeStat.int_fncLength,
+        'CCN[<%s]' % int_complex,
+        'argn[<%s]' % int_parCnt,
+        'flen[<%s]' % int_fncLen,
         'fnc name',
         's',
         'e']
@@ -106,11 +106,11 @@ def printLIZARDerrArrayShortAndColor(errArray, codeStat):
     for errLine in errArray:
         line = []
 
-        line.append(chckCondAndRetColored(errLine[1],codeStat.int_mccabeComplex))
+        line.append(chckCondAndRetColored(errLine[1],int_complex))
 
-        line.append(chckCondAndRetColored(errLine[3],codeStat.int_paramCnt))
+        line.append(chckCondAndRetColored(errLine[3],int_parCnt))
 
-        line.append(chckCondAndRetColored(errLine[4],codeStat.int_fncLength))
+        line.append(chckCondAndRetColored(errLine[4],int_fncLen))
 
         # fnc name
         line.append(errLine[6])
