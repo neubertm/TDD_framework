@@ -494,9 +494,9 @@ class CTestPkg():
 
         if self.b_silent:
             testResult = 0
-            if intRetVal > 1 :
+            if intRetVal <= 1 :
                 testResult = tdd_support.interpretCPPUTESToutput(outF)
-            if testResult:
+            if testResult == True:
                 self.str_testStatus = Fore.GREEN + "Pass" + Style.RESET_ALL
             else:
                 self.str_testStatus = Fore.RED + "Fail" + Style.RESET_ALL
