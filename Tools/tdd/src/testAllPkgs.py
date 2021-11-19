@@ -549,7 +549,7 @@ class CTestPkg():
                 # if dict_covFile[key] :
                 # print( key,"Uncovered lines: ", dict_covFile[key])
                 if any(sfname in key for sfname in sutFileNames):
-                    cntUncov = len(dict_covFile[key])
+                    cntUncov = len(set(dict_covFile[key]))
                     if cntUncov:
                         str_uncov = Fore.RED
                         isCoverageProblem = True
@@ -564,9 +564,11 @@ class CTestPkg():
             if not self.b_silent:
                 print("Non covered lines: " + self.str_uncoverage)
                 if isCoverageProblem:
-                    print(
-                        "Some lines could be duplicite"
-                        + " because c++ create multiple implementation of functions")
+                    pass
+                    # This is probably obsolete, but with coverage can be trouble with different behavior for c and c++
+                    # print(
+                    #    "Some lines could be duplicite"
+                    #    + " because c++ create multiple implementation of functions")
                 for file in dict_covFile:
                     lineLst = dict_covFile[file]
                     res = []
