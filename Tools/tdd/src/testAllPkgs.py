@@ -570,12 +570,14 @@ class CTestPkg():
                     #    "Some lines could be duplicite"
                     #    + " because c++ create multiple implementation of functions")
                 for file in dict_covFile:
-                    lineLst = dict_covFile[file]
-                    res = []
-                    [res.append(x) for x in lineLst if x not in res]
-                    lenOfLineLst = len(res)
+                    lineLst = set(dict_covFile[file])
+                    # res = []
+                    # [res.append(x) for x in lineLst if x not in res]
+                    # lenOfLineLst = len(res)
+                    lenOfLineLst = len(lineLst)
                     if lenOfLineLst != 0:
-                        strLineLst = ", ".join(res)
+                        # strLineLst = ", ".join(res)
+                        strLineLst = ", ".join(lineLst)
                         print(Fore.LIGHTRED_EX + '.'.join(file.split(".")[
                               :-1]) + " [ " + strLineLst + "]" + Style.RESET_ALL)
         else:
