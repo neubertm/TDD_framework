@@ -160,14 +160,23 @@ def createCMakeListsFromConfiguration(fileName: str, mainCfg: CMainConfig(), tes
                 'SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS}'
                 ' ${GCC_COVERAGE_COMPILE_FLAGS} -Wall -Werror -pedantic")\n'
             )
-            cmFile.write('set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE ON)\n')
-            cmFile.write('set(CMAKE_C_OUTPUT_EXTENSION_REPLACE ON)\n')
+            cmFile.write('SET(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE ON)\n')
+            cmFile.write('SET(CMAKE_C_OUTPUT_EXTENSION_REPLACE ON)\n')
 
             cmFile.write(
                 "SET( CMAKE_EXE_LINKER_FLAGS  "
                 '"${CMAKE_EXE_LINKER_FLAGS} '
-                '${GCC_COVERAGE_LINK_FLAGS}" )\n\n'
+                '${GCC_COVERAGE_LINK_FLAGS}" )\n'
             )
+
+        # next include macro header is code injection in to production code. Overriding malloc and operator new.
+        str_frameworkFolderName = "cpputest"
+        pIncludeDir = Path.cwd()
+        pIncludeDir = pIncludeDir / "Tools" / "testlibs" / \
+            str_frameworkFolderName / "include"
+        memLeakDetectionInclude = pIncludeDir / 'CppUTest'
+        cmFile.write('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%r' % str(memLeakDetectionInclude / "MemoryLeakDetectorNewMacros.h")))
+        cmFile.write("SET(CMAKE_C_FLAGS  \"${CMAKE_C_FLAGS} -include %s\")\n\n" % ('%r' % str(memLeakDetectionInclude / "MemoryLeakDetectorMallocMacros.h")))
 
         # add executable
         # # open add_executable
@@ -264,13 +273,7 @@ def createCMakeListsFromConfiguration(fileName: str, mainCfg: CMainConfig(), tes
             "\t" + '"' + "${CMAKE_SOURCE_DIR}"
             + sep + tmpTestSrcFldr + '"' + "\n"
         )
-        # # add includes from utest framework,
-        #  TODO here have to be condition for creating include conditionaly.
-        #  cpputest or gtest
-        str_frameworkFolderName = "cpputest"
-        pIncludeDir = Path.cwd()
-        pIncludeDir = pIncludeDir / "Tools" / "testlibs" / \
-            str_frameworkFolderName / "include"
+
         strVl = '%r' % str(pIncludeDir)
         cmFile.write("\t\"" + strVl[1: -1] + "\"\n")
 

@@ -502,7 +502,7 @@ class CTestPkg():
                 self.str_testStatus = Fore.RED + "Fail" + Style.RESET_ALL
                 bRetVal = False
         else:
-            if intRetVal > 1:
+            if not ( intRetVal in range(0,100) ):
                 print(Fore.RED + '\nSomething is rotten in (Denmark) that code.')
                 print('Test application terminate with this error: %i' % intRetVal)
                 print(Style.RESET_ALL)
