@@ -55,4 +55,5 @@ class TestCreateNewModule(unittest.TestCase):
         self.assertEqual(newModule.str_SRC_TYPE,"")
 
     def test_createNewModule_setSourceCodeType(self):
+        
         pass
