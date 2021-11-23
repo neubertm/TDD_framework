@@ -1,0 +1,21 @@
+#!/bin/sh
+
+cd `git rev-parse --show-toplevel`
+
+devVerF="Tools/tdd/devVersion.txt"
+
+now_utc=`date -u "+%Y-%m-%d %H:%M:%S"`
+branch=`git rev-parse --abbrev-ref HEAD`
+name=`git config user.name`
+email=`git config user.email`
+hash=`git log -1 --format="%H"`
+
+echo "Time_UTC: " $now_utc  > $devVerF
+echo "Branch: " $branch >> $devVerF
+echo "Name: " $name >> $devVerF
+echo "Email: " $email >> $devVerF
+echo "HASH: $hash" >> $devVerF
+
+git add $devVerF
+
+cd -
