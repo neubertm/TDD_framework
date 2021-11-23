@@ -88,6 +88,9 @@ class VersionDevelopment:
             pass
         return bRetVal
 
+    def getTime(self):
+        return self.Time_UTC
+
     def getHash(self):
         return self.HASH
 

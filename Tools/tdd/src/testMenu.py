@@ -41,6 +41,8 @@ from pathlib import Path
 
 import testAllPkgs as tall
 
+import versionSupport as vs
+
 
 def createTestMenu(coEnv: CEnvCfg, filePath: Path):
     print(str(filePath))
@@ -67,7 +69,8 @@ class TestMenu:
         self.co_pkg = CTestPkgDescription()
         self.co_pkg.readFromFile(str(pathFileTestPkg))
         self.contentLst = []
-        self.menu = ConsoleMenu("TDDRealm is C++ unit test framework.",
+        o_vd = vs.VersionRelease()
+        self.menu = ConsoleMenu("eTDD is C++ unit test framework. %s" % (o_vd.getStrReleaseVersion()),
                                 "Choose test packag/es variant.", show_exit_option=False)
 
     def __getTestPackageList__(self, str_path, str_suff):
@@ -86,8 +89,16 @@ class TestMenu:
         return testDirList, testNameList
 
     def __prepareMenu__(self, testDirList, testNameList):
-        self.menu = ConsoleMenu("TDDRealm is C++ unit test framework.",
-                                "Choose test packag/es variant.", show_exit_option=False)
+        o_vr = vs.VersionRelease()
+        o_dv = vs.VersionDevelopment()
+        verDevFile = Path('.') / "Tools" / "tdd" / "devVersion.txt"
+
+        self.menu = ConsoleMenu("eTDD is C++ unit test framework. (%s)" % (o_vr.getStrReleaseVersion()),
+                            "Choose test packag/es variant.", show_exit_option=False)
+
+        if True == o_dv.readVersionFile(verDevFile):
+            self.menu.epilogue_text = "DVer[%s, %s]" %(o_dv.getTime(), o_dv.getHash()[:7])
+
         exit = ExitItem("Auf wiedersehen!!", menu=None)
         self.menu.append_item(exit)
 
