@@ -5,13 +5,13 @@ extern "C" {
 //CppUTest includes should be after your and system includes
 #include "CppUTest/TestHarness.h"
 #include "CppUTestExt/MockSupport.h"
-#include "CppUTest/MemoryLeakDetectorNewMacros.h"
+
 
 // helper function to init argument
 invertArgument_t argInit(unsigned short x, unsigned short p, unsigned short n)
 {
 	invertArgument_t arg = {x, p, n};
-	
+
 	return arg;
 }
 
@@ -29,23 +29,23 @@ TEST_GROUP(BitInverter)
 TEST(BitInverter, inverter_works_in_bounds)
 {
 	invertArgument_t arg;
-	
+
 	arg = argInit(0x00, 3, 2);
 	LONGS_EQUAL(0x0C, invert(arg));
-	
+
 	arg = argInit(0x00, 1, 2);
 	LONGS_EQUAL(0x03, invert(arg));
-	
+
 	arg = argInit(0x03, 1, 2);
 	LONGS_EQUAL(0x00, invert(arg));
-	
+
 	arg = argInit(0xAA, 3, 2);
 	LONGS_EQUAL(0xA6, invert(arg));
 
 	// MSB inversion
 	arg = argInit(0xF000, 15, 1);
 	LONGS_EQUAL(0x7000, invert(arg));
-	
+
 	// LSB inversion
 	arg = argInit(0xF000, 0, 1);
 	LONGS_EQUAL(0xF001, invert(arg));

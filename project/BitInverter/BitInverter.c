@@ -13,9 +13,8 @@
 
 unsigned short invert(invertArgument_t argument)
 {
-	unsigned short mask; 
+	unsigned short mask;
 	unsigned short result;
-
 	// out of bounds (right side)
 	if (argument.n > argument.p + 1)
 	{
