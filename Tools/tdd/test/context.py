@@ -9,3 +9,4 @@ sys.path.insert(0, os.path.abspath(
 import startTddTool
 import mainMenu
 import createNewModule
+import versionSupport
