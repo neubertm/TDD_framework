@@ -5,6 +5,11 @@ Hello this document describe how set up and enabled this unit test framework.
 For initialization of framework you have to be connected to internet. Because
 we need additional packages and tools.
 
+## If you want to participate
+If you want to participate please configure your git config to use shared git hooks.
+Open your git terminal in the root of TDD_framework and use code bellow.
+`git config core.hooksPath .githooks`
+
 ## Current situation
 What works now is full functionality of framework, but we are limited only for Windows platform and gcc compiler.
 

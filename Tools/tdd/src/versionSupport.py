@@ -98,5 +98,3 @@ class VersionDevelopment:
         if num < ( len(self.HASH) - 2 ):
             return self.HASH[:num] + "..." + self.HASH[-num:]
         return self.getHash
-
-#class VersionFull:
