@@ -7,7 +7,7 @@ we need additional packages and tools.
 
 ## If you want to participate
 If you want to participate please configure your git config to use shared git hooks.
-Open your git terminal in the root of TDD_framework and use code bellow.
+Open your git terminal in the root of TDD_framework and use code bellow.  
 `git config core.hooksPath .githooks`
 
 ## Current situation
@@ -89,7 +89,11 @@ Is intended to allow this.
 13. Add more statics about code, multimetric package and configuration for that
 14. Add precise configuration of showed tables. For summary test.
 
+## Known problems
+1. In summary test cant be terminate test before its finished. 
 
+### Windows issues
+1. Windows(cmd) terminal windows could be sensitive to mouse action. Inserting content cause freezing but confirming(pressing enter) terminate test.
 
 ## C# testing
 C# is impossible to use now.
