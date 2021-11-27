@@ -29,7 +29,14 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###############################################################################
 
+from TDDConfig import CTestPkgDescription
 from TDDConfig import CTestConfig
+from TDDConfig import CCovCfg
+from TDDConfig import CStaticAnalysisCfg
+from TDDConfig import CFormaterGuidelineCheckerCfg
+from TDDConfig import CTestToolchainCfg
+from TDDConfig import CCodeStatisticsCfg
+
 
 def printout(text):
     print(text)
@@ -75,8 +82,10 @@ class CreateNewModule():
     str_LANGUAGE: str
     str_COMPONENT_NAME: str
     str_SRC_TYPE: str
+    testConfig: CTestConfig
+    pkgDesc: CTestPkgDescription
 
-    def __init__(self):
+    def __init__(self, cTestPkgDesc: CTestPkgDescription):
         self.str_SRC_FOLDER = ''
         self.str_HEADER_FOLDER = ''
         self.str_FRAMEWORK = "cpputest"
@@ -84,41 +93,111 @@ class CreateNewModule():
         self.str_LANGUAGE = 'c++'
         self.str_COMPONENT_NAME = ''
         self.str_SRC_TYPE = ''
+        self.testConfig = CTestConfig()
+        self.pkgDesc = cTestPkgDesc
         pass
 
-    def setModuleConfiguration(self, tConfig):
+    def setModuleConfiguration(self):
         '''
         This function create configuration for creating new module.
         Result will be definition of files, type of source code.
         Complete test configuration
+
+        Function explanation:
+        1) define what type of module we want to create. c/c++
+        2) define SUT file Configuration
+            a) Name, name of class or pkg
+            b) Define name of files  NAME.suffix  for hdr and scr
+        3) define test configuration for additional steps
         '''
         # define src folder
         ## question if user wants to create C or C++
-        moduleType = questionWithList("What type of code will the new module be?", ['c++','c'], 'c++')
+        self.str_LANGUAGE = questionWithList("What type of code will the new module be?", ['c++','c'], 'c++')
 
-        resLst = defineFileConfiguration(moduleType, tConfig)
+        resLst = defineSUTFileConfiguration()
 
-        
+        testConfig.co_coverage = defineCoverageCfg()
+
+        testConfig.co_staticAnalysis = defineStatAnalysisCfg()
+
+        testConfig.co_testToolchain = defineToolchainCfg()
+
+        testConfig.co_codeStatistics = defineCodeStatisticsCfg()
 
         pass
 
     def createNewModule(self):
+        '''
+        This function create new module according  user ideas.
+        1) First user define how it should look like.
+        2) Create new SUT object header and source file.
+        3) Create new test package folder and fill with default files and user configurations.
+        '''
         setModuleConfiguration()
+
+        createFolder_SUT()
+
+        createFolder_TPKG()
+
         pass
 
-    def defineFileConfiguration(moduleType, tConfig):
-        fileLst = defineFileNames(moduleType)
+    def defineSutFileConfiguration(self):
+        '''
+            Function have to create filenames, and folder where will be placed.
+            Function have two arguments:
+            moduleType: is string variable expected values are c,c++
+            cTestPkgDesc: is folder configuration description class, used for default location of files
+        '''
+        fileLst = defineSutFileNames()
 
-        folderLst = defineFolders()
+        folderLst = defineSutFolders()
 
         return [fileLst, folderLst]
         pass
 
-    def defineFileNames(moduleType):
+    def defineSutFileNames(self):
+        '''
+        Function create name of files for sut. Header and Source
+        1) check position of sourcefolder from configuration
+        2) self.str_LANGUAGE contain type
+        3) User define class name or pkg name(c-code)
+        4) New file name is proposed, user can define own.
+        Name of files will be stored in as attribute.
+        '''
         pass
 
-    def defineFolders():
+    def defineSutFolders(self):
+        '''
+        Function define position of sut files(header and source)
+        There will be some default choise but user can define. Specific for header and source.
+        HeaderFolder and SourceFolder will be stored as attribute
+        '''
         pass
 
-    def copyFilesToCorrectPositions(resLst):
+    def copyFilesToCorrectPositions(self, resLst):
+        pass
+
+    def defineCoverageCfg(self):
+        '''
+        User can define coverage configuration.
+        '''
+        pass
+
+    def defineStatAnalysisCfg(self):
+        '''
+        User can define static analysis configuration.
+        '''
+        pass
+
+    def defineToolchainCfg(self):
+        '''
+        User can define toolchain configuration.
+        But currently this choise will be disabled.
+        '''
+        pass
+
+    def defineCodeStatisticsCfg(self):
+        '''
+        User can define complexity static configuration.
+        '''
         pass
