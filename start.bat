@@ -62,6 +62,8 @@ IF ERRORLEVEL 1 (
     ECHO Python exists. Let's go!
 )
 
+title eTDD framework
+
 cd %~dp0 && python Tools/tdd/src/startTddTool.py
 
 REM pause
