@@ -37,12 +37,27 @@ from TDDConfig import CFormaterGuidelineCheckerCfg
 from TDDConfig import CTestToolchainCfg
 from TDDConfig import CCodeStatisticsCfg
 
+from pathlib import Path
+
 
 def printout(text):
     print(text)
 
 def get_input(text):
     return input(text)
+
+def questionReturnString(questionText):
+    '''
+    Function ask user to fill string value. User have to confirm his choice.
+    '''
+    b_confirm = False
+    str_retVal = ''
+
+    while not b_confirm:
+        str_retVal = get_input(questionText)
+        b_confirm = questionYesNo('Confirm this value: %s' % (str_retVal))
+
+    return str_retVal
 
 def questionYesNo(QuestionOfText):
     bRetVal = False
@@ -82,19 +97,26 @@ class CreateNewModule():
     str_LANGUAGE: str
     str_COMPONENT_NAME: str
     str_SRC_TYPE: str
+    copyFileLst: [(str,str)]
     testConfig: CTestConfig
     pkgDesc: CTestPkgDescription
 
     def __init__(self, cTestPkgDesc: CTestPkgDescription):
         self.str_SRC_FOLDER = ''
         self.str_HEADER_FOLDER = ''
+        self.str_SRC_FILE = ''
+        self.str_HEADER_FILE = ''
         self.str_FRAMEWORK = "cpputest"
         self.str_TOOLCHAIN = "mingw"
         self.str_LANGUAGE = 'c++'
         self.str_COMPONENT_NAME = ''
         self.str_SRC_TYPE = ''
+        self.copyFileLst = []
         self.testConfig = CTestConfig()
         self.pkgDesc = cTestPkgDesc
+        pass
+
+    def createAndCopyFiles(self):
         pass
 
     def setModuleConfiguration(self):
@@ -114,15 +136,15 @@ class CreateNewModule():
         ## question if user wants to create C or C++
         self.str_LANGUAGE = questionWithList("What type of code will the new module be?", ['c++','c'], 'c++')
 
-        resLst = defineSUTFileConfiguration()
+        self.defineSutFileConfiguration()
 
-        testConfig.co_coverage = defineCoverageCfg()
+        self.testConfig.co_coverage = self.defineCoverageCfg()
 
-        testConfig.co_staticAnalysis = defineStatAnalysisCfg()
+        self.testConfig.co_staticAnalysis = self.defineStatAnalysisCfg()
 
-        testConfig.co_testToolchain = defineToolchainCfg()
+        self.testConfig.co_testToolchain = self.defineToolchainCfg()
 
-        testConfig.co_codeStatistics = defineCodeStatisticsCfg()
+        self.testConfig.co_codeStatistics = self.defineCodeStatisticsCfg()
 
         pass
 
@@ -133,38 +155,72 @@ class CreateNewModule():
         2) Create new SUT object header and source file.
         3) Create new test package folder and fill with default files and user configurations.
         '''
-        setModuleConfiguration()
+        self.setModuleConfiguration()
 
-        createFolder_SUT()
+        self.createFolder_SUT()
 
-        createFolder_TPKG()
+        self.createFolder_TPKG()
+
+        self.createAndCopyFiles()
 
         pass
 
     def defineSutFileConfiguration(self):
         '''
             Function have to create filenames, and folder where will be placed.
-            Function have two arguments:
-            moduleType: is string variable expected values are c,c++
-            cTestPkgDesc: is folder configuration description class, used for default location of files
         '''
-        fileLst = defineSutFileNames()
+        # this fill self.str_SRC_FILE
+        #           self.str_HEADER_FILE
+        self.defineSutFileNames()
 
-        folderLst = defineSutFolders()
-
-        return [fileLst, folderLst]
+        # this fill self.str_SRC_FOLDER
+        #           self.str_HEADER_FOLDER
+        self.defineSutFolders()
         pass
+
+
+    def createFolder_SUT(self):
+
+        pass
+
+    def createFolder_TPKG(self):
+        pass
+
+
 
     def defineSutFileNames(self):
         '''
         Function create name of files for sut. Header and Source
-        1) check position of sourcefolder from configuration
-        2) self.str_LANGUAGE contain type
-        3) User define class name or pkg name(c-code)
-        4) New file name is proposed, user can define own.
         Name of files will be stored in as attribute.
         '''
-        pass
+        str_srcsuff = ''
+        str_headersuff = ''
+        printout("New SUT object definition:")
+        if self.str_LANGUAGE == 'c++':
+            str_srcsuff = questionWithList('Choose suffix for src file.',['cpp', 'CPP', 'cc', 'CC'],'cpp')
+            #print(str_srcsuff)
+            str_headersuff = questionWithList('Choose suffix for header file.',['hpp','HPP','h','H'],'hpp')
+            #print(str_headersuff)
+        elif self.str_LANGUAGE == 'c':
+            str_srcsuff = questionWithList('Choose suffix for src file.',['c', 'C'],'c')
+            str_headersuff = questionWithList('Choose suffix for header file.',['h','H'],'h')
+            pass
+        else:
+            assert False, 'Currently not supported source file type.'
+
+        self.str_COMPONENT_NAME = questionReturnString('Define class/module name.')
+
+        #print([self.str_COMPONENT_NAME,str_srcsuff])
+        str_fullSrcName = '.'.join([self.str_COMPONENT_NAME,str_srcsuff])
+        str_fullHeaderName = '.'.join([self.str_COMPONENT_NAME,str_headersuff])
+
+        printout("New SUT file are: \n\t%s\n\t%s" % (str_fullHeaderName, str_fullSrcName))
+        if not questionYesNo('Are names correct?'):
+            str_fullHeaderName = questionReturnString('Define full name for header (name.suff).')
+            str_fullSrcName = questionReturnString('Define full name for source (name.suff).')
+
+        self.str_SRC_FILE = str_fullSrcName
+        self.str_HEADER_FILE = str_fullHeaderName
 
     def defineSutFolders(self):
         '''
@@ -172,7 +228,25 @@ class CreateNewModule():
         There will be some default choise but user can define. Specific for header and source.
         HeaderFolder and SourceFolder will be stored as attribute
         '''
+
+        path_SrcFolder    = Path(self.pkgDesc.str_srcfldr) / 'src'
+        path_HeaderFolder = Path(self.pkgDesc.str_srcfldr) / 'include'
+        str_SrcFolder = str(path_SrcFolder)
+        str_HeaderFolder = str(path_HeaderFolder)
+
+        printout("Default folders:\n\tHeader: %s\n\tSource: %s" % (str_HeaderFolder, str_SrcFolder))
+        if not questionYesNo('Are folders correct?'):
+            path_HeaderFolder = Path(self.pkgDesc.str_srcfldr) / questionReturnString('Define folder name for header. (inside \"%s\" folder).' % (self.pkgDesc.str_srcfldr))
+            path_SrcFolder    = Path(self.pkgDesc.str_srcfldr) / questionReturnString('Define folder name for source. (inside \"%s\" folder).' % (self.pkgDesc.str_srcfldr))
+            str_SrcFolder = str(path_SrcFolder)
+            str_HeaderFolder = str(path_HeaderFolder)
+
+        self.str_SRC_FOLDER = str_SrcFolder
+        self.str_HEADER_FOLDER = str_HeaderFolder
+
         pass
+
+
 
     def copyFilesToCorrectPositions(self, resLst):
         pass

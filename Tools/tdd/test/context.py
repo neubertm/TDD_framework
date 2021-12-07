@@ -10,3 +10,4 @@ import startTddTool
 import mainMenu
 import createNewModule
 import versionSupport
+import TDDConfig
