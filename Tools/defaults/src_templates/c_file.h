@@ -1,19 +1,19 @@
 /*!****************************************************************************
  *  \brief      This header file contains definition of
- *              ... class
+ *              ... c module for %COMPONENT_NAME
  *
- *  \file       %%FILENAME.hpp
+ *  \file       %FILENAME
  *
  *  \author     XYz, X Yz, X.Yz@siemens.com
  *
  *  \date       %DATE
  *
- *  \copyright  Copyright (C) 2019 Siemens AG. All rights reserved.
+ *  \copyright  Copyright (C) %YEAR Siemens AG. All rights reserved.
  *****************************************************************************/
 
-#ifndef %FILENAME_hpp_INCLUDED
-#define %FILENAME_hpp_INCLUDED
+#ifndef %FILENAME_h_INCLUDED
+#define %FILENAME_h_INCLUDED
 
 int exampleFnc();
 
-#endif // Emitter%PACKAGENAME_%FILENAME_hpp_INCLUDED
+#endif // %FILENAME_h_INCLUDED

@@ -38,13 +38,85 @@ from TDDConfig import CTestToolchainCfg
 from TDDConfig import CCodeStatisticsCfg
 
 from pathlib import Path
+from datetime import datetime
 
+def copyTxtFile(str_src, str_dst):
+    dest = Path('str_dst')
+    src = Path('str_src')
+    dest.write_text(src.read_text())
+
+
+def readFileToStr(str_src: str):
+    retStr = ''
+    with open(str_src, 'r') as ftext:
+        retStr = ftext.read()
+
+    return retStr
+
+def writeStringToFile(strVar,str_dst):
+    with open(str_dst, 'w') as ftext:
+        ftext.write(strVar)
+
+
+def patchString(strVar,patchDict):
+    for key in patchDict.keys():
+        strVar = strVar.replace(key,patchDict[key])
+    return strVar
+
+
+def timeInShortString():
+    now = datetime.now()
+    return now.strftime('%y%m%d%H%M%S')
+
+def assertWithText(condition, text):
+    assert condition, text
 
 def printout(text):
     print(text)
 
 def get_input(text):
     return input(text)
+
+def createFolder(str_folder):
+    '''
+        Function returning True when folder already exists or is succesfuly created.
+        False - file doesnt exist and mkdir failed.
+    '''
+    pHeaderFolder = Path(str_folder)
+    if not pHeaderFolder.is_dir():
+        pHeaderFolder.mkdir(mode=666,parent=True)
+        assertWithText(pHeaderFolder.is_dir(), 'Creating folder %s failed!' % (str_folder))
+
+def processFile(str_src, str_dest, dic):
+    '''
+    Function copy file from src position to dest position. In file make changes when it find a key from dic rewrites by value.
+    '''
+    #1 open file and read to string variable
+    strVar = readFileToStr(str_src)
+    #2 patch string with dictionary
+    patchStrVar = patchString(strVar,dic)
+    #3 store string in file str_dest
+    writeStringToFile(patchStrVar,str_dest)
+
+    pass
+
+def questionReturningPositiveInteger(questionText):
+    b_confirm = False
+
+    int_retVal = -1
+
+    while not b_confirm:
+        str_retVal = get_input(questionText + ' [Fill positive number]:')
+        if str_retVal.isDecimal():
+            int_retVal = int(str_retVal)
+        else:
+            printout('Invalid input try it again.')
+            continue
+
+        if 0 < int_retVal :
+            b_confirm = questionYesNo('Confirm this value: %i' % (int_retVal))
+
+    pass
 
 def questionReturnString(questionText):
     '''
@@ -97,6 +169,7 @@ class CreateNewModule():
     str_LANGUAGE: str
     str_COMPONENT_NAME: str
     str_SRC_TYPE: str
+    str_TPKG_FOLDER: str
     copyFileLst: [(str,str)]
     testConfig: CTestConfig
     pkgDesc: CTestPkgDescription
@@ -111,12 +184,18 @@ class CreateNewModule():
         self.str_LANGUAGE = 'c++'
         self.str_COMPONENT_NAME = ''
         self.str_SRC_TYPE = ''
+        self.str_TPKG_FOLDER = ''
         self.copyFileLst = []
         self.testConfig = CTestConfig()
         self.pkgDesc = cTestPkgDesc
         pass
 
     def createAndCopyFiles(self):
+        self.createHeaderFile()
+        self.createSourceFile()
+        self.copyAndCreateTestFiles()
+        self.createTestInitFile()
+        self.copyTestCMakefile()
         pass
 
     def setModuleConfiguration(self):
@@ -180,11 +259,27 @@ class CreateNewModule():
 
 
     def createFolder_SUT(self):
-
-        pass
+        '''
+            This function check if exist SUT folders. If not create them.
+        '''
+        createFolder(self.str_HEADER_FOLDER)
+        createFolder(self.str_SRC_FOLDER)
 
     def createFolder_TPKG(self):
-        pass
+        '''
+            This function create TPKG folder and subfolder.
+            When TPKG folder exist, create new and push current date
+            in to the name.
+        '''
+        pTpkgFldr = Path(self.pkgDesc.str_testpath) / (self.str_COMPONENT_NAME + self.pkgDesc.str_testfldr_suffix)
+
+        if pTpkgFldr.is_dir():
+            pTpkgFldr = Path(self.pkgDesc.str_testpath) / (self.str_COMPONENT_NAME + timeInShortString() + self.pkgDesc.str_testfldr_suffix)
+
+        self.str_TPKG_FOLDER = str(pTpkgFldr)
+
+        createFolder(self.str_TPKG_FOLDER)
+        createFolder(str(pTpkgFldr / self.pkgDesc.str_srctestfldr))
 
 
 
@@ -236,8 +331,8 @@ class CreateNewModule():
 
         printout("Default folders:\n\tHeader: %s\n\tSource: %s" % (str_HeaderFolder, str_SrcFolder))
         if not questionYesNo('Are folders correct?'):
-            path_HeaderFolder = Path(self.pkgDesc.str_srcfldr) / questionReturnString('Define folder name for header. (inside \"%s\" folder).' % (self.pkgDesc.str_srcfldr))
-            path_SrcFolder    = Path(self.pkgDesc.str_srcfldr) / questionReturnString('Define folder name for source. (inside \"%s\" folder).' % (self.pkgDesc.str_srcfldr))
+            path_HeaderFolder = Path(self.pkgDesc.str_srcfldr) / questionReturnString('Define folder name for header. (inside \"%s\" folder):' % (self.pkgDesc.str_srcfldr))
+            path_SrcFolder    = Path(self.pkgDesc.str_srcfldr) / questionReturnString('Define folder name for source. (inside \"%s\" folder):' % (self.pkgDesc.str_srcfldr))
             str_SrcFolder = str(path_SrcFolder)
             str_HeaderFolder = str(path_HeaderFolder)
 
@@ -255,23 +350,142 @@ class CreateNewModule():
         '''
         User can define coverage configuration.
         '''
+        self.testConfig.co_coverage.isTurnedOn = questionYesNo('Do you want to enable coverage:')
+        self.testConfig.co_coverage.uncoveredLineListLength = 0
         pass
 
     def defineStatAnalysisCfg(self):
         '''
         User can define static analysis configuration.
         '''
-        pass
+
+        self.testConfig.co_staticAnalysis.isTurnedOn  = questionYesNo('Do you want to enable static analysis:')
+        # configuration make sence only when static analysis is turned on. we can let it in default state.
+        if self.testConfig.co_staticAnalysis.isTurnedOn:
+            self.testConfig.co_staticAnalysis.isLanguageDefinedBySuffix = questionYesNo('Should be language recognized from suffix:')
+            self.testConfig.co_staticAnalysis.str_c_version = questionWithList('Choose version of c.',['c89', 'c99', 'c11'],'c99')
+            self.testConfig.co_staticAnalysis.str_cpp_version = questionWithList('Choose version of c++.',['c++03', 'c++11', 'c++17', 'c++20'],'c++11')
+
+        self.testConfig.co_staticAnalysis.str_tool = 'cppcheck'
+        self.testConfig.co_staticAnalysis.str_ForcedLang = self.str_LANGUAGE
+
 
     def defineToolchainCfg(self):
         '''
         User can define toolchain configuration.
-        But currently this choise will be disabled.
+        But currently this choises will be disabled.
         '''
+        self.testConfig.co_testToolchain.str_compiler = 'mingw'
+        self.testConfig.co_testToolchain.str_testlib = 'cpputest'
         pass
 
     def defineCodeStatisticsCfg(self):
         '''
         User can define complexity static configuration.
         '''
+        self.testConfig.co_codeStatistics.isTurnedOn = questionYesNo('Do you want to enable code quality parameters:')
+
+        if self.testConfig.co_codeStatistics.isTurnedOn:
+            self.testConfig.co_codeStatistics.isUsedTestSpecificOnly = questionYesNo('Do you want to use only test specific parameters:')
+            if not self.testConfig.co_codeStatistics.isUsedTestSpecificOnly:
+                self.testConfig.co_codeStatistics.isUsedStricter = questionYesNo('Do you want to use harder criteries(test vs. project):')
+            self.testConfig.co_codeStatistics.int_mccabeComplex = questionReturningPositiveInteger('Define McCabe complexity')
+            self.testConfig.co_codeStatistics.int_fncLength = questionReturningPositiveInteger('Define function length')
+            self.testConfig.co_codeStatistics.int_paramCnt  = questionReturningPositiveInteger('Define maximum function params')
+            pass
+        pass
+
+    def createHeaderFile(self):
+        '''
+        Function check kind of language, choose correct default template file.
+        Sed correct value from configuration.
+        '''
+        str_src = ''
+        path_src = Path('Tools') / 'defaults' / 'src_templates'
+        dict = {'%COMPONENT_NAME': self.str_COMPONENT_NAME
+                ,'%FILENAME': self.str_HEADER_FILE.split('.')[0]
+                ,'%DATE':datetime.now().strftime('%d.%m.%y %H:%M:%S')
+                ,'%YEAR':datetime.now().strftime('%Y')
+                }
+        if 'c++' == self.str_LANGUAGE:
+            dict['%CLASSNAME'] = self.str_COMPONENT_NAME
+            path_src = path_src / 'class.hpp'
+        elif 'c' == self.str_LANGUAGE:
+            path_src = path_src / 'c_file.h'
+        else:
+            assertWithText(False, 'Invalid language type.')
+
+        str_src = str(path_src)
+        str_dst = str(Path(self.str_HEADER_FOLDER) / self.str_HEADER_FILE)
+        processFile(str_src,str_dst, dict)
+        pass
+
+    def createSourceFile(self):
+        '''
+        Copy and process source file.
+        '''
+        str_src = ''
+        path_src = Path('Tools') / 'defaults' / 'src_templates'
+        dict = {'%COMPONENT_NAME': self.str_COMPONENT_NAME
+                ,'%FILENAME': self.str_SRC_FILE.split('.')[0]
+                ,'%DATE':datetime.now().strftime('%d.%m.%y %H:%M:%S')
+                ,'%YEAR':datetime.now().strftime('%Y')
+                ,'%HEADER_FILENAME': self.str_HEADER_FILE
+                }
+        if 'c++' == self.str_LANGUAGE:
+            dict['%CLASSNAME'] = self.str_COMPONENT_NAME
+            path_src = path_src / 'class.cpp'
+        elif 'c' == self.str_LANGUAGE:
+            path_src = path_src / 'c_file.c'
+        else:
+            assertWithText(False, 'Invalid language type.')
+
+        str_src = str(path_src)
+        str_dst = str(Path(self.str_SOURCE_FOLDER) / self.str_SOURCE_FILE)
+        processFile(str_src,str_dst, dict)
+
+    def copyAndCreateTestFiles(self):
+        '''
+        Copy and process test.cpp and AllTests.cpp
+        '''
+        #0 check if exists _Tpkg/src folder, but if this is correctly called its not necessary
+        pTestFldr = Path(self.str_TPKG_FOLDER) / self.pkgDesc.str_srctestfldr
+        if not pTestFldr.is_dir():
+            pTestFldr.mkdir()
+
+        #1 copy AllTests.cpp
+        str_allTsts = 'AllTests.cpp'
+        str_allTestFileDst = str(pTestFldr / str_allTsts)
+        str_allTestFileSrc = str(Path('Tools') / 'defaults' / 'src_templates' / str_allTsts)
+
+        copyTxtFile(str_allTestFileSrc,str_allTestFileDst)
+
+        #2 process test file according language
+        str_src = ''
+        path_src = Path('Tools') / 'defaults' / 'src_templates'
+        dict = {'%COMPONENT_NAME': self.str_COMPONENT_NAME
+                ,'%FILENAME': self.str_SRC_FILE.split('.')[0]
+                ,'%DATE':datetime.now().strftime('%d.%m.%y %H:%M:%S')
+                ,'%YEAR':datetime.now().strftime('%Y')
+                ,'%HEADER_FILENAME': self.str_HEADER_FILE
+                }
+        if 'c++' == self.str_LANGUAGE:
+            dict['%CLASSNAME'] = self.str_COMPONENT_NAME
+            path_src = path_src / 'test.cpp'
+        elif 'c' == self.str_LANGUAGE:
+            path_src = path_src / 'c_test.cpp'
+        else:
+            assertWithText(False, 'Invalid language type.')
+
+        str_src = str(path_src)
+        str_dst = str(pTestFldr / 'test.cpp')
+        processFile(str_src,str_dst, dict)
+
+
+        pass
+
+    def createTestInitFile(self):
+        pass
+
+    def copyTestCMakefile(self):
         pass

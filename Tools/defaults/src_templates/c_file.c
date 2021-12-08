@@ -1,21 +1,21 @@
 /*!****************************************************************************
  *  \brief      This file implements
- *              ... class
+ *              ... c-module for %COMPONENT_NAME
  *
  *
- *  \file       %FILENAME.cpp
+ *  \file       %FILENAME
  *
  *  \author     XYz, X Yz, X.Yz@siemens.com
  *
  *  \date       %DATE
  *
- *  \copyright  Copyright (C) 2019 Siemens AG. All rights reserved.
+ *  \copyright  Copyright (C) %YEAR Siemens AG. All rights reserved.
  *****************************************************************************/
 
 // =============================================================================
 // Own includes
 // =============================================================================
-#include "%FILENAME.hpp"
+#include "%HEADER_FILENAME"
 
 // =============================================================================
 // Dependency includes
