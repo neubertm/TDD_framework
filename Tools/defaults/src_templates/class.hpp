@@ -16,6 +16,7 @@
 
 // N2-1 Type definitions shall be used instead of the basic numerical types char, int, float, double etc.
 //#include "define.h"
+#define Uint32_t uint32_t	//TODO: delte this define and create correct define.h file
 
 // =============================================================================
 // Required includes

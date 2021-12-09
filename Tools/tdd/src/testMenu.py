@@ -37,6 +37,8 @@ from TDDConfig import CCodeStatParamMinValue
 from TDDConfig import CTestPkgDescription
 from TDDConfig import CMainConfig
 
+from createNewModule import CreateNewModule
+
 from pathlib import Path
 
 import testAllPkgs as tall
@@ -61,6 +63,7 @@ class TestMenu:
     co_pkg: CTestPkgDescription
     contentLst: []
     menu: ConsoleMenu
+    obj_createModule: CreateNewModule
 
     def __init__(self, coEnv: CEnvCfg, pathFileTestPkg: Path):
         self.co_env = coEnv
@@ -72,6 +75,7 @@ class TestMenu:
         o_vd = vs.VersionRelease()
         self.menu = ConsoleMenu("eTDD is C++ unit test framework. %s" % (o_vd.getStrReleaseVersion()),
                                 "Choose test packag/es variant.", show_exit_option=False)
+        self.obj_createModule = CreateNewModule(self.co_pkg)
 
     def __getTestPackageList__(self, str_path, str_suff):
         regExpPattern = "*" + str_suff
@@ -101,6 +105,12 @@ class TestMenu:
 
         exit = ExitItem("Auf wiedersehen!!", menu=None)
         self.menu.append_item(exit)
+
+        self.obj_createModule = CreateNewModule(self.co_pkg)
+        addNewModule_item = FunctionItem('Create new module from templates',
+                                    self.obj_createModule.createNewModule
+                                    ,[])
+        self.menu.append_item(addNewModule_item)
 
         mCfg = CMainConfig()
         mCfg.co_env = self.co_env

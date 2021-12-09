@@ -40,9 +40,15 @@ from TDDConfig import CCodeStatisticsCfg
 from pathlib import Path
 from datetime import datetime
 
+def boolToYesNoStr(valBool):
+    str_retVal = 'No'
+    if valBool:
+        str_retVal = 'Yes'
+    return str_retVal
+
 def copyTxtFile(str_src, str_dst):
-    dest = Path('str_dst')
-    src = Path('str_src')
+    dest = Path(str_dst)
+    src = Path(str_src)
     dest.write_text(src.read_text())
 
 
@@ -84,7 +90,7 @@ def createFolder(str_folder):
     '''
     pHeaderFolder = Path(str_folder)
     if not pHeaderFolder.is_dir():
-        pHeaderFolder.mkdir(mode=666,parent=True)
+        pHeaderFolder.mkdir(mode=666,parents=True)
         assertWithText(pHeaderFolder.is_dir(), 'Creating folder %s failed!' % (str_folder))
 
 def processFile(str_src, str_dest, dic):
@@ -107,7 +113,7 @@ def questionReturningPositiveInteger(questionText):
 
     while not b_confirm:
         str_retVal = get_input(questionText + ' [Fill positive number]:')
-        if str_retVal.isDecimal():
+        if str_retVal.isdecimal():
             int_retVal = int(str_retVal)
         else:
             printout('Invalid input try it again.')
@@ -148,11 +154,11 @@ def questionYesNo(QuestionOfText):
 def questionWithList(QuestionOfText,list,default):
     str_RetVal = default
 
-    str_choises = '|'.join(list)
+    str_choises = ' | '.join(list)
     while(1):
         answer = get_input(QuestionOfText + " ( %s ) default[%s]:" % (str_choises, str_RetVal))
         if answer == "":
-            printout('Using default value.')
+            printout('Using value: %s' % (str_RetVal))
             break
         elif answer in list:
             str_RetVal = answer
@@ -163,7 +169,9 @@ def questionWithList(QuestionOfText,list,default):
 
 class CreateNewModule():
     str_SRC_FOLDER: str
+    str_SRC_FOLDER_REL: str
     str_HEADER_FOLDER: str
+    str_HEADER_FOLDER_REL: str
     str_FRAMEWORK: str
     str_TOOLCHAIN: str
     str_LANGUAGE: str
@@ -176,7 +184,9 @@ class CreateNewModule():
 
     def __init__(self, cTestPkgDesc: CTestPkgDescription):
         self.str_SRC_FOLDER = ''
+        self.str_SRC_FOLDER_REL = ''
         self.str_HEADER_FOLDER = ''
+        self.str_HEADER_FOLDER_REL = ''
         self.str_SRC_FILE = ''
         self.str_HEADER_FILE = ''
         self.str_FRAMEWORK = "cpputest"
@@ -213,17 +223,17 @@ class CreateNewModule():
         '''
         # define src folder
         ## question if user wants to create C or C++
-        self.str_LANGUAGE = questionWithList("What type of code will the new module be?", ['c++','c'], 'c++')
+        self.str_LANGUAGE = questionWithList("What type of code will be the new module?", ['c++','c'], 'c++')
 
         self.defineSutFileConfiguration()
 
-        self.testConfig.co_coverage = self.defineCoverageCfg()
+        self.defineCoverageCfg()
 
-        self.testConfig.co_staticAnalysis = self.defineStatAnalysisCfg()
+        self.defineStatAnalysisCfg()
 
-        self.testConfig.co_testToolchain = self.defineToolchainCfg()
+        self.defineToolchainCfg()
 
-        self.testConfig.co_codeStatistics = self.defineCodeStatisticsCfg()
+        self.defineCodeStatisticsCfg()
 
         pass
 
@@ -303,7 +313,7 @@ class CreateNewModule():
         else:
             assert False, 'Currently not supported source file type.'
 
-        self.str_COMPONENT_NAME = questionReturnString('Define class/module name.')
+        self.str_COMPONENT_NAME = questionReturnString('Define class/module name: ')
 
         #print([self.str_COMPONENT_NAME,str_srcsuff])
         str_fullSrcName = '.'.join([self.str_COMPONENT_NAME,str_srcsuff])
@@ -323,16 +333,19 @@ class CreateNewModule():
         There will be some default choise but user can define. Specific for header and source.
         HeaderFolder and SourceFolder will be stored as attribute
         '''
-
-        path_SrcFolder    = Path(self.pkgDesc.str_srcfldr) / 'src'
-        path_HeaderFolder = Path(self.pkgDesc.str_srcfldr) / 'include'
+        self.str_SRC_FOLDER_REL = 'src'
+        self.str_HEADER_FOLDER_REL = 'include'
+        path_SrcFolder    = Path(self.pkgDesc.str_srcfldr) / self.str_SRC_FOLDER_REL
+        path_HeaderFolder = Path(self.pkgDesc.str_srcfldr) / self.str_HEADER_FOLDER_REL
         str_SrcFolder = str(path_SrcFolder)
         str_HeaderFolder = str(path_HeaderFolder)
 
         printout("Default folders:\n\tHeader: %s\n\tSource: %s" % (str_HeaderFolder, str_SrcFolder))
         if not questionYesNo('Are folders correct?'):
-            path_HeaderFolder = Path(self.pkgDesc.str_srcfldr) / questionReturnString('Define folder name for header. (inside \"%s\" folder):' % (self.pkgDesc.str_srcfldr))
-            path_SrcFolder    = Path(self.pkgDesc.str_srcfldr) / questionReturnString('Define folder name for source. (inside \"%s\" folder):' % (self.pkgDesc.str_srcfldr))
+            self.str_HEADER_FOLDER_REL = questionReturnString('Define folder name for header. (inside \"%s\" folder):' % (self.pkgDesc.str_srcfldr))
+            self.str_SRC_FOLDER_REL = questionReturnString('Define folder name for source. (inside \"%s\" folder):' % (self.pkgDesc.str_srcfldr))
+            path_HeaderFolder = Path(self.pkgDesc.str_srcfldr) / self.str_HEADER_FOLDER_REL
+            path_SrcFolder    = Path(self.pkgDesc.str_srcfldr) / self.str_SRC_FOLDER_REL
             str_SrcFolder = str(path_SrcFolder)
             str_HeaderFolder = str(path_HeaderFolder)
 
@@ -382,9 +395,9 @@ class CreateNewModule():
         self.testConfig.co_codeStatistics.isTurnedOn = questionYesNo('Do you want to enable code quality parameters:')
 
         if self.testConfig.co_codeStatistics.isTurnedOn:
-            self.testConfig.co_codeStatistics.isUsedTestSpecificOnly = questionYesNo('Do you want to use only test specific parameters:')
+            self.testConfig.co_codeStatistics.isUsedTestSpecificOnly = questionYesNo('Do you want to use even global parameters?')
             if not self.testConfig.co_codeStatistics.isUsedTestSpecificOnly:
-                self.testConfig.co_codeStatistics.isUsedStricter = questionYesNo('Do you want to use harder criteries(test vs. project):')
+                self.testConfig.co_codeStatistics.isUsedStricter = questionYesNo('Do you want to use harder criteries(test vs. global):')
             self.testConfig.co_codeStatistics.int_mccabeComplex = questionReturningPositiveInteger('Define McCabe complexity')
             self.testConfig.co_codeStatistics.int_fncLength = questionReturningPositiveInteger('Define function length')
             self.testConfig.co_codeStatistics.int_paramCnt  = questionReturningPositiveInteger('Define maximum function params')
@@ -437,7 +450,8 @@ class CreateNewModule():
             assertWithText(False, 'Invalid language type.')
 
         str_src = str(path_src)
-        str_dst = str(Path(self.str_SOURCE_FOLDER) / self.str_SOURCE_FILE)
+        #print(self.str_SRC_FILE)
+        str_dst = str(Path(self.str_SRC_FOLDER) / self.str_SRC_FILE)
         processFile(str_src,str_dst, dict)
 
     def copyAndCreateTestFiles(self):
@@ -469,6 +483,7 @@ class CreateNewModule():
             dict['%CLASSNAME'] = self.str_COMPONENT_NAME
             path_src = path_src / 'test.cpp'
         elif 'c' == self.str_LANGUAGE:
+            dict['%TESTGROUPNAME'] = self.str_COMPONENT_NAME
             path_src = path_src / 'c_test.cpp'
         else:
             assertWithText(False, 'Invalid language type.')
@@ -483,25 +498,25 @@ class CreateNewModule():
         if not pTestFldr.is_dir():
             pTestFldr.mkdir()
 
-        dict = { '%SRC_FLDR%': self.str_SRC_FOLDER
+        dict = { '%SRC_FLDR%': self.str_SRC_FOLDER_REL
                 ,'%SRC_FILENAME%': self.str_SRC_FILE
-                ,'%HEADER_FLDR%': self.str_HEADER_FOLDER
+                ,'%HEADER_FLDR%': self.str_HEADER_FOLDER_REL
                 ,'%HEADER_FILENAME%': self.str_HEADER_FILE
-                ,'%COVERAGE_IS_USED%': self.testConfig.co_coverage.isTurnedOn
-                ,'%COVERAGE_UNCOVLISTLEN%': self.testConfig.co_coverage.uncoveredLineListLength
-                ,'%CHECKCODE_IS_USED%': self.testConfig.co_staticAnalysis.isTurnedOn
+                ,'%COVERAGE_IS_USED%': boolToYesNoStr(self.testConfig.co_coverage.isTurnedOn)
+                ,'%COVERAGE_UNCOVLISTLEN%': str(self.testConfig.co_coverage.uncoveredLineListLength)
+                ,'%CHECKCODE_IS_USED%': boolToYesNoStr(self.testConfig.co_staticAnalysis.isTurnedOn)
                 ,'%CHECKCODE_TOOL%': self.testConfig.co_staticAnalysis.str_tool
                 ,'%CHECKCODE_FORCEDLANG%': self.testConfig.co_staticAnalysis.str_ForcedLang
                 ,'%CHECKCODE_C_VERSION%': self.testConfig.co_staticAnalysis.str_c_version
                 ,'%CHECKCODE_CPP_VERSION%': self.testConfig.co_staticAnalysis.str_cpp_version
                 ,'%TOOLCHAIN%': self.testConfig.co_testToolchain.str_compiler
                 ,'%FRAMEWORK%': self.testConfig.co_testToolchain.str_testlib
-                ,'%STATISTICS_IS_USED%': self.testConfig.co_codeStatistics.isTurnedOn
-                ,'%STATISTICS_USE_SPECIFIC_ONLY%': self.testConfig.co_codeStatistics.isUsedTestSpecificOnly
-                ,'%STATISTICS_USE_STRICTER%': self.testConfig.co_codeStatistics.isUsedStricter
-                ,'%STATISTICS_MCCAVE_LEVEL%': self.testConfig.co_codeStatistics.int_mccabeComplex
-                ,'%STATISTICS_FNCLEN_LEVEL%': self.testConfig.co_codeStatistics.int_fncLength
-                ,'%STATISTICS_PARAM_CNT%': self.testConfig.co_codeStatistics.int_paramCnt
+                ,'%STATISTICS_IS_USED%': boolToYesNoStr(self.testConfig.co_codeStatistics.isTurnedOn)
+                ,'%STATISTICS_USE_SPECIFIC_ONLY%': boolToYesNoStr(self.testConfig.co_codeStatistics.isUsedTestSpecificOnly)
+                ,'%STATISTICS_USE_STRICTER%': boolToYesNoStr(self.testConfig.co_codeStatistics.isUsedStricter)
+                ,'%STATISTICS_MCCAVE_LEVEL%': str(self.testConfig.co_codeStatistics.int_mccabeComplex)
+                ,'%STATISTICS_FNCLEN_LEVEL%': str(self.testConfig.co_codeStatistics.int_fncLength)
+                ,'%STATISTICS_PARAM_CNT%': str(self.testConfig.co_codeStatistics.int_paramCnt)
                 }
 
         str_src = str(Path('Tools') / 'defaults' / 'src_templates' / 'test.ini')

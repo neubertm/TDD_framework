@@ -215,7 +215,7 @@ class TestCreateNewModule(unittest.TestCase):
     @patch('createNewModule.printout')
     @patch('createNewModule.questionYesNo', return_value=False)
     @patch('createNewModule.questionReturnString', side_effect=['INCLUDE', 'SOURCE'])
-    def test_defineSutFolders_UserDefinedSutFolders(self, mock_printout, mock_qyn, mock_qrs):
+    def test_defineSutFolders_UserDefinedSutFolders(self, mock_qrs, mock_qyn, mock_printout):
         testDesc = TDDConfig.CTestPkgDescription()
         newModule = createNewModule.CreateNewModule(testDesc)
 
@@ -399,7 +399,7 @@ class TestCreateNewModule(unittest.TestCase):
         createNewModule.createFolder("FOO_FOLDER_NAME")
 
         mock_PathInit.assert_called_with("FOO_FOLDER_NAME")
-        mock_mkdir.assert_called_with(mode=666,parent=True)
+        mock_mkdir.assert_called_with(mode=666,parents=True)
         mock_awt.assert_called_with(True, 'Creating folder FOO_FOLDER_NAME failed!')
 
 
@@ -539,35 +539,36 @@ class TestCreateNewModule(unittest.TestCase):
     def test_createSourceFile_cSrc(self, mock_pf):
         testDesc = TDDConfig.CTestPkgDescription()
         nm = createNewModule.CreateNewModule(testDesc)
+        self.assertEqual(nm.str_SRC_FOLDER,'')
         nm.str_LANGUAGE = 'c'
-        nm.str_SOURCE_FOLDER = 'SOURCEFOLDER'
-        nm.str_SOURCE_FILE = 'SOURCEfile.C'
+        nm.str_SRC_FOLDER = 'SOURCEFOLDER'
+        nm.str_SRC_FILE = 'SOURCEfile.C'
 
         nm.createSourceFile()
 
         self.assertTrue(mock_pf.called)
         pf_args = mock_pf.call_args
         str_src = str(Path('Tools') / 'defaults' / 'src_templates' / 'c_file.c')
-        str_dst = str(Path(nm.str_SOURCE_FOLDER) / nm.str_SOURCE_FILE)
+        str_dst = str(Path(nm.str_SRC_FOLDER) / nm.str_SRC_FILE)
         len_dic = 5
         self.assertEqual(str_src, pf_args[0][0])
         self.assertEqual(str_dst, pf_args[0][1])
         self.assertEqual(len_dic, len(pf_args[0][2]))
 
     @patch('createNewModule.processFile')
-    def test_createSourceFile_cSrc(self, mock_pf):
+    def test_createSourceFile_cppSrc(self, mock_pf):
         testDesc = TDDConfig.CTestPkgDescription()
         nm = createNewModule.CreateNewModule(testDesc)
         nm.str_LANGUAGE = 'c++'
-        nm.str_SOURCE_FOLDER = 'SOURCEFOLDER'
-        nm.str_SOURCE_FILE = 'SOURCEfile.CPP'
+        nm.str_SRC_FOLDER = 'SOURCEFOLDER'
+        nm.str_SRC_FILE = 'SOURCEfile.CPP'
 
         nm.createSourceFile()
 
         self.assertTrue(mock_pf.called)
         pf_args = mock_pf.call_args
         str_src = str(Path('Tools') / 'defaults' / 'src_templates' / 'class.cpp')
-        str_dst = str(Path(nm.str_SOURCE_FOLDER) / nm.str_SOURCE_FILE)
+        str_dst = str(Path(nm.str_SRC_FOLDER) / nm.str_SRC_FILE)
         len_dic = 6
         self.assertEqual(str_src, pf_args[0][0])
         self.assertEqual(str_dst, pf_args[0][1])
@@ -612,7 +613,7 @@ class TestCreateNewModule(unittest.TestCase):
         str_dst = str(Path(nm.str_TPKG_FOLDER) / nm.pkgDesc.str_srctestfldr / 'test.cpp')
         self.assertEqual( str_src, pf_args[0][0])
         self.assertEqual( str_dst, pf_args[0][1])
-        self.assertEqual( 5, len(pf_args[0][2]))
+        self.assertEqual( 6, len(pf_args[0][2]))
         pass
 
     @patch('createNewModule.copyTxtFile')

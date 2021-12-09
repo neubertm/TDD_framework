@@ -9,7 +9,7 @@
  *
  *  \date       %DATE
  *
- *  \copyright  Copyright (C) 2019 Siemens AG. All rights reserved.
+ *  \copyright  Copyright (C) %YEAR Siemens AG. All rights reserved.
  *****************************************************************************/
 
 // =============================================================================
