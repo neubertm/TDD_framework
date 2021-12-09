@@ -77,6 +77,13 @@ class TestMenu:
                                 "Choose test packag/es variant.", show_exit_option=False)
         self.obj_createModule = CreateNewModule(self.co_pkg)
 
+    # This function is trick how to rewrite list of testpackages afte we create new module
+    def __callCreateNewPkg__(self):
+        self.obj_createModule.createNewModule()
+        self.__prepareMenu__()
+        self.menu.show()
+        pass
+
     def __getTestPackageList__(self, str_path, str_suff):
         regExpPattern = "*" + str_suff
         path_dir = Path(str_path).glob(regExpPattern)
@@ -92,7 +99,12 @@ class TestMenu:
         testNameList = [dir[:-len_tpkgS] for dir in testDirList]
         return testDirList, testNameList
 
-    def __prepareMenu__(self, testDirList, testNameList):
+    def __prepareMenu__(self):
+        str_testPackagesPath = self.co_pkg.str_testpath
+        str_testPackageSuffix = self.co_pkg.str_testfldr_suffix
+        testDirList, testNameList = self.__getTestPackageList__(
+            str_testPackagesPath, str_testPackageSuffix)
+
         o_vr = vs.VersionRelease()
         o_dv = vs.VersionDevelopment()
         verDevFile = Path('.') / "Tools" / "tdd" / "devVersion.txt"
@@ -108,8 +120,9 @@ class TestMenu:
 
         self.obj_createModule = CreateNewModule(self.co_pkg)
         addNewModule_item = FunctionItem('Create new module from templates',
-                                    self.obj_createModule.createNewModule
-                                    ,[])
+                                    self.__callCreateNewPkg__
+                                    ,[]
+                                    ,should_exit=True) # this is naive hack how rewrite package in list
         self.menu.append_item(addNewModule_item)
 
         mCfg = CMainConfig()
@@ -135,12 +148,6 @@ class TestMenu:
             self.menu.append_item(testItem)
 
     def createAndShow(self):
-        str_testPackagesPath = self.co_pkg.str_testpath
-        str_testPackageSuffix = self.co_pkg.str_testfldr_suffix
-        testDirList, testNameList = self.__getTestPackageList__(
-            str_testPackagesPath, str_testPackageSuffix)
-        print(testDirList)
-        print(testNameList)
-        self.__prepareMenu__(testDirList, testNameList)
+        self.__prepareMenu__()
         self.menu.show()
         pass
