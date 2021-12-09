@@ -581,8 +581,9 @@ class TestCreateNewModule(unittest.TestCase):
         self.assertEqual(str_dst, pf_args[0][1])
         self.assertEqual(len_dic, len(pf_args[0][2]))
 
+    @patch('createNewModule.checkIfFolderExists')
     @patch('createNewModule.processFile')
-    def test_createTestInitFile_default(self, mock_pf):
+    def test_createTestInitFile_default(self, mock_pf, mock_chife):
         testDesc = TDDConfig.CTestPkgDescription()
         nm = createNewModule.CreateNewModule(testDesc)
         nm.str_TPKG_FOLDER = 'TEST_Tpkg'
@@ -597,13 +598,18 @@ class TestCreateNewModule(unittest.TestCase):
         self.assertEqual(str_dst, pf_args[0][1])
         self.assertEqual(len_dic, len(pf_args[0][2]))
 
+        pathForCreating = Path(nm.str_TPKG_FOLDER)
+        mock_chife.assert_called_with(pathForCreating)
+
+    @patch('createNewModule.checkIfFolderExists')
     @patch('createNewModule.copyTxtFile')
     @patch('createNewModule.processFile')
-    def test_copyAndCreateTestFiles_cTest_(self,mock_pf , mock_ctf):
+    def test_copyAndCreateTestFiles_cTest_(self,mock_pf , mock_ctf, mock_chife):
         testDesc = TDDConfig.CTestPkgDescription()
         nm = createNewModule.CreateNewModule(testDesc)
         nm.str_TPKG_FOLDER = 'TEST_Tpkg'
         nm.str_LANGUAGE = 'c'
+        pathTestFldr = Path(nm.str_TPKG_FOLDER) / nm.pkgDesc.str_srctestfldr
 
         nm.copyAndCreateTestFiles()
 
@@ -621,15 +627,19 @@ class TestCreateNewModule(unittest.TestCase):
         self.assertEqual( str_src, pf_args[0][0])
         self.assertEqual( str_dst, pf_args[0][1])
         self.assertEqual( 6, len(pf_args[0][2]))
-        pass
 
+        #check call of copyAndCreateTestFiles
+        mock_chife.assert_called_with(pathTestFldr)
+
+    @patch('createNewModule.checkIfFolderExists')
     @patch('createNewModule.copyTxtFile')
     @patch('createNewModule.processFile')
-    def test_copyAndCreateTestFiles_cppTest_(self,mock_pf , mock_ctf):
+    def test_copyAndCreateTestFiles_cppTest_(self,mock_pf , mock_ctf, mock_chife):
         testDesc = TDDConfig.CTestPkgDescription()
         nm = createNewModule.CreateNewModule(testDesc)
         nm.str_TPKG_FOLDER = 'TEST_Tpkg'
         nm.str_LANGUAGE = 'c++'
+        pathTestFldr = Path(nm.str_TPKG_FOLDER) / nm.pkgDesc.str_srctestfldr
 
         nm.copyAndCreateTestFiles()
 
@@ -647,7 +657,9 @@ class TestCreateNewModule(unittest.TestCase):
         self.assertEqual( str_src, pf_args[0][0])
         self.assertEqual( str_dst, pf_args[0][1])
         self.assertEqual( 6, len(pf_args[0][2]))
-        pass
+
+        #check call of copyAndCreateTestFiles
+        mock_chife.assert_called_with(pathTestFldr)
 
 
     @patch('createNewModule.processFile')
