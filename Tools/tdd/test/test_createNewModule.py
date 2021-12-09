@@ -61,23 +61,23 @@ class TestCreateNewModule(unittest.TestCase):
         self.assertEqual(newModule.str_SRC_TYPE,"")
         self.assertEqual(newModule.copyFileLst,[])
 
-    @patch('createNewModule.CreateNewModule.setModuleConfiguration')
-    @patch('createNewModule.CreateNewModule.createFolder_SUT')
-    @patch('createNewModule.CreateNewModule.createFolder_TPKG')
-    @patch('createNewModule.CreateNewModule.createAndCopyFiles')
-    def test_createNewModule_testTopFunctionForCreateNewModule(self, mock_input1,  mock_input2,  mock_input3, mock_input4):
-        testDesc = TDDConfig.CTestPkgDescription
-        newModule = createNewModule.CreateNewModule(testDesc)
-        newModule.createNewModule()
-        pass
-
+#    @patch('createNewModule.CreateNewModule.setModuleConfiguration')
+#    @patch('createNewModule.CreateNewModule.createFolder_SUT')
+#    @patch('createNewModule.CreateNewModule.createFolder_TPKG')
+#    @patch('createNewModule.CreateNewModule.createAndCopyFiles')
+#    def test_createNewModule_testTopFunctionForCreateNewModule(self, mock_input1,  mock_input2,  mock_input3, mock_input4):
+#        testDesc = TDDConfig.CTestPkgDescription
+#        newModule = createNewModule.CreateNewModule(testDesc)
+#        newModule.createNewModule()
+#        pass
+    @patch('createNewModule.printout')
     @patch('createNewModule.questionWithList', return_value='c')
     @patch('createNewModule.CreateNewModule.defineSutFileConfiguration')
     @patch('createNewModule.CreateNewModule.defineCoverageCfg', return_value=TDDConfig.CCovCfg())
     @patch('createNewModule.CreateNewModule.defineStatAnalysisCfg', return_value=TDDConfig.CStaticAnalysisCfg())
     @patch('createNewModule.CreateNewModule.defineToolchainCfg', return_value=TDDConfig.CTestToolchainCfg())
     @patch('createNewModule.CreateNewModule.defineCodeStatisticsCfg', return_value=TDDConfig.CCodeStatisticsCfg())
-    def test_createNewModule_setModuleConfiguration_setC(self,mock_qList,mock_files,mock_cover,mock_statA,mock_toolCH,mock_codeStat):
+    def test_createNewModule_setModuleConfiguration_setC(self, mock_codeStat, mock_toolCH, mock_statA, mock_cover, mock_files, mock_qList, mock_printout):
         testDesc = TDDConfig.CTestPkgDescription
         newModule = createNewModule.CreateNewModule(testDesc)
         newModule.setModuleConfiguration()
@@ -89,15 +89,17 @@ class TestCreateNewModule(unittest.TestCase):
         self.assertTrue(mock_statA.called)
         self.assertTrue(mock_toolCH.called)
         self.assertTrue(mock_codeStat.called)
+        self.assertEqual(6, len(mock_printout.call_args_list))
         pass
 
+    @patch('createNewModule.printout')
     @patch('createNewModule.questionWithList', return_value='c++')
     @patch('createNewModule.CreateNewModule.defineSutFileConfiguration')
     @patch('createNewModule.CreateNewModule.defineCoverageCfg', return_value=TDDConfig.CCovCfg())
     @patch('createNewModule.CreateNewModule.defineStatAnalysisCfg', return_value=TDDConfig.CStaticAnalysisCfg())
     @patch('createNewModule.CreateNewModule.defineToolchainCfg', return_value=TDDConfig.CTestToolchainCfg())
     @patch('createNewModule.CreateNewModule.defineCodeStatisticsCfg', return_value=TDDConfig.CCodeStatisticsCfg())
-    def test_createNewModule_setModuleConfiguration_setCPP(self,mock_qList,mock_files,mock_cover,mock_statA,mock_toolCH,mock_codeStat):
+    def test_createNewModule_setModuleConfiguration_setCPP(self, mock_codeStat, mock_toolCH, mock_statA, mock_cover, mock_files, mock_qList, mock_printout):
         testDesc = TDDConfig.CTestPkgDescription
         newModule = createNewModule.CreateNewModule(testDesc)
         newModule.setModuleConfiguration()
@@ -109,13 +111,16 @@ class TestCreateNewModule(unittest.TestCase):
         self.assertTrue(mock_statA.called)
         self.assertTrue(mock_toolCH.called)
         self.assertTrue(mock_codeStat.called)
+        self.assertEqual(6, len(mock_printout.call_args_list))
         pass
 
+
+    @patch('createNewModule.printout')
     @patch('createNewModule.CreateNewModule.setModuleConfiguration')
     @patch('createNewModule.CreateNewModule.createFolder_SUT')
     @patch('createNewModule.CreateNewModule.createFolder_TPKG')
     @patch('createNewModule.CreateNewModule.createAndCopyFiles')
-    def test_createNewModule_testTopFunctionForCreateNewModule(self, mock_setModule, mock_createSutFolder, mock_createPkgFolder,  mock_fileCopy):
+    def test_createNewModule_testTopFunctionForCreateNewModule(self, mock_fileCopy, mock_createPkgFolder, mock_createSutFolder, mock_setModule, mock_printout):
         testDesc = TDDConfig.CTestPkgDescription
         newModule = createNewModule.CreateNewModule(testDesc)
         newModule.createNewModule()
@@ -123,7 +128,9 @@ class TestCreateNewModule(unittest.TestCase):
         self.assertTrue(mock_createSutFolder.called)
         self.assertTrue(mock_createPkgFolder.called)
         self.assertTrue(mock_fileCopy.called)
-        pass
+        self.assertTrue(mock_printout.called)
+        self.assertEqual(5,len(mock_printout.call_args_list))
+
 
     @patch('createNewModule.CreateNewModule.defineSutFileNames')
     @patch('createNewModule.CreateNewModule.defineSutFolders')

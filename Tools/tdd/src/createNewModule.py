@@ -40,10 +40,13 @@ from TDDConfig import CCodeStatisticsCfg
 from pathlib import Path
 from datetime import datetime
 
-def boolToYesNoStr(valBool):
-    str_retVal = 'No'
+import colorama
+from colorama import Fore, Style
+
+def boolToStr(valBool):
+    str_retVal = 'False'
     if valBool:
-        str_retVal = 'Yes'
+        str_retVal = 'True'
     return str_retVal
 
 def copyTxtFile(str_src, str_dst):
@@ -122,7 +125,7 @@ def questionReturningPositiveInteger(questionText):
         if 0 < int_retVal :
             b_confirm = questionYesNo('Confirm this value: %i' % (int_retVal))
 
-    pass
+    return int_retVal
 
 def questionReturnString(questionText):
     '''
@@ -223,16 +226,17 @@ class CreateNewModule():
         '''
         # define src folder
         ## question if user wants to create C or C++
+        printout('')
         self.str_LANGUAGE = questionWithList("What type of code will be the new module?", ['c++','c'], 'c++')
-
+        printout(Fore.GREEN + 'Definition of SUT Files configuration' + Style.RESET_ALL)
         self.defineSutFileConfiguration()
-
+        printout(Fore.GREEN + 'Definition of coverage check' + Style.RESET_ALL)
         self.defineCoverageCfg()
-
+        printout(Fore.GREEN + 'Definition of static analysis check' + Style.RESET_ALL)
         self.defineStatAnalysisCfg()
-
+        printout(Fore.GREEN + 'Definition of toolchain for test' + Style.RESET_ALL + ' (Default)')
         self.defineToolchainCfg()
-
+        printout(Fore.GREEN + 'Definition of code statistics check' + Style.RESET_ALL)
         self.defineCodeStatisticsCfg()
 
         pass
@@ -244,12 +248,15 @@ class CreateNewModule():
         2) Create new SUT object header and source file.
         3) Create new test package folder and fill with default files and user configurations.
         '''
+        colorama.init()
+        printout(Fore.YELLOW + 'Creating new module' + Style.RESET_ALL)
+        printout(Fore.CYAN + 'Definition of module:' + Style.RESET_ALL)
         self.setModuleConfiguration()
-
+        printout(Fore.CYAN + 'Checking/Creating SUT folder' + Style.RESET_ALL)
         self.createFolder_SUT()
-
+        printout(Fore.CYAN + 'Checking/Creating TPKG folder' + Style.RESET_ALL)
         self.createFolder_TPKG()
-
+        printout(Fore.CYAN + 'Copying/Creating TPKG files' + Style.RESET_ALL)
         self.createAndCopyFiles()
 
         pass
@@ -373,7 +380,7 @@ class CreateNewModule():
         if self.testConfig.co_staticAnalysis.isTurnedOn:
             self.testConfig.co_staticAnalysis.isLanguageDefinedBySuffix = questionYesNo('Should be language recognized from suffix:')
             self.testConfig.co_staticAnalysis.str_c_version = questionWithList('Choose version of c.',['c89', 'c99', 'c11'],'c99')
-            self.testConfig.co_staticAnalysis.str_cpp_version = questionWithList('Choose version of c++.',['c++03', 'c++11', 'c++17', 'c++20'],'c++11')
+            self.testConfig.co_staticAnalysis.str_cpp_version = questionWithList('Choose version of c++.',['c++03', 'c++11', 'c++14', 'c++17', 'c++20'],'c++11')
 
         self.testConfig.co_staticAnalysis.str_tool = 'cppcheck'
         self.testConfig.co_staticAnalysis.str_ForcedLang = self.str_LANGUAGE
@@ -395,14 +402,13 @@ class CreateNewModule():
         self.testConfig.co_codeStatistics.isTurnedOn = questionYesNo('Do you want to enable code quality parameters:')
 
         if self.testConfig.co_codeStatistics.isTurnedOn:
-            self.testConfig.co_codeStatistics.isUsedTestSpecificOnly = questionYesNo('Do you want to use even global parameters?')
+            self.testConfig.co_codeStatistics.isUsedTestSpecificOnly = questionYesNo('Do you want to use only test parameters? Global params will not be taken in account.')
             if not self.testConfig.co_codeStatistics.isUsedTestSpecificOnly:
                 self.testConfig.co_codeStatistics.isUsedStricter = questionYesNo('Do you want to use harder criteries(test vs. global):')
             self.testConfig.co_codeStatistics.int_mccabeComplex = questionReturningPositiveInteger('Define McCabe complexity')
             self.testConfig.co_codeStatistics.int_fncLength = questionReturningPositiveInteger('Define function length')
             self.testConfig.co_codeStatistics.int_paramCnt  = questionReturningPositiveInteger('Define maximum function params')
-            pass
-        pass
+
 
     def createHeaderFile(self):
         '''
@@ -502,18 +508,18 @@ class CreateNewModule():
                 ,'%SRC_FILENAME%': self.str_SRC_FILE
                 ,'%HEADER_FLDR%': self.str_HEADER_FOLDER_REL
                 ,'%HEADER_FILENAME%': self.str_HEADER_FILE
-                ,'%COVERAGE_IS_USED%': boolToYesNoStr(self.testConfig.co_coverage.isTurnedOn)
+                ,'%COVERAGE_IS_USED%': boolToStr(self.testConfig.co_coverage.isTurnedOn)
                 ,'%COVERAGE_UNCOVLISTLEN%': str(self.testConfig.co_coverage.uncoveredLineListLength)
-                ,'%CHECKCODE_IS_USED%': boolToYesNoStr(self.testConfig.co_staticAnalysis.isTurnedOn)
+                ,'%CHECKCODE_IS_USED%': boolToStr(self.testConfig.co_staticAnalysis.isTurnedOn)
                 ,'%CHECKCODE_TOOL%': self.testConfig.co_staticAnalysis.str_tool
                 ,'%CHECKCODE_FORCEDLANG%': self.testConfig.co_staticAnalysis.str_ForcedLang
                 ,'%CHECKCODE_C_VERSION%': self.testConfig.co_staticAnalysis.str_c_version
                 ,'%CHECKCODE_CPP_VERSION%': self.testConfig.co_staticAnalysis.str_cpp_version
                 ,'%TOOLCHAIN%': self.testConfig.co_testToolchain.str_compiler
                 ,'%FRAMEWORK%': self.testConfig.co_testToolchain.str_testlib
-                ,'%STATISTICS_IS_USED%': boolToYesNoStr(self.testConfig.co_codeStatistics.isTurnedOn)
-                ,'%STATISTICS_USE_SPECIFIC_ONLY%': boolToYesNoStr(self.testConfig.co_codeStatistics.isUsedTestSpecificOnly)
-                ,'%STATISTICS_USE_STRICTER%': boolToYesNoStr(self.testConfig.co_codeStatistics.isUsedStricter)
+                ,'%STATISTICS_IS_USED%': boolToStr(self.testConfig.co_codeStatistics.isTurnedOn)
+                ,'%STATISTICS_USE_SPECIFIC_ONLY%': boolToStr(self.testConfig.co_codeStatistics.isUsedTestSpecificOnly)
+                ,'%STATISTICS_USE_STRICTER%': boolToStr(self.testConfig.co_codeStatistics.isUsedStricter)
                 ,'%STATISTICS_MCCAVE_LEVEL%': str(self.testConfig.co_codeStatistics.int_mccabeComplex)
                 ,'%STATISTICS_FNCLEN_LEVEL%': str(self.testConfig.co_codeStatistics.int_fncLength)
                 ,'%STATISTICS_PARAM_CNT%': str(self.testConfig.co_codeStatistics.int_paramCnt)
