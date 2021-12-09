@@ -5,11 +5,11 @@
  *
  *  \file       %FILENAME
  *
- *  \author     XYz, X Yz, X.Yz@siemens.com
+ *  \author     Name, Surname, email@address.here
  *
  *  \date       %DATE
  *
- *  \copyright  Copyright (C) %YEAR Siemens AG. All rights reserved.
+ *  \copyright  Copyright (C) %YEAR FILL_ORGANIZATION_NAME. All rights reserved.
  *****************************************************************************/
 
 // =============================================================================

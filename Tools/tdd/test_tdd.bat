@@ -51,6 +51,8 @@ IF ERRORLEVEL 1 (
 )
 
 python -m unittest test\test_startTddTool.py
+python -m unittest test\test_createNewModule.py
+python -m unittest test\test_versionSupport.py
 
 
-cmd /k
+pause

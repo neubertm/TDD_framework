@@ -43,6 +43,10 @@ from datetime import datetime
 import colorama
 from colorama import Fore, Style
 
+def checkIfFolderExists(pathFldr):
+    if not pathFldr.is_dir():
+        pathFldr.mkdir()
+
 def boolToStr(valBool):
     str_retVal = 'False'
     if valBool:
@@ -466,8 +470,7 @@ class CreateNewModule():
         '''
         #0 check if exists _Tpkg/src folder, but if this is correctly called its not necessary
         pTestFldr = Path(self.str_TPKG_FOLDER) / self.pkgDesc.str_srctestfldr
-        if not pTestFldr.is_dir():
-            pTestFldr.mkdir()
+        checkIfFolderExists(pTestFldr)
 
         #1 copy AllTests.cpp
         str_allTsts = 'AllTests.cpp'
@@ -501,8 +504,7 @@ class CreateNewModule():
 
     def createTestInitFile(self):
         pTestFldr = Path(self.str_TPKG_FOLDER)
-        if not pTestFldr.is_dir():
-            pTestFldr.mkdir()
+        checkIfFolderExists(pTestFldr)
 
         dict = { '%SRC_FLDR%': self.str_SRC_FOLDER_REL
                 ,'%SRC_FILENAME%': self.str_SRC_FILE
