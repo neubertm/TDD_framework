@@ -452,7 +452,7 @@ class TestCreateNewModule(unittest.TestCase):
     @patch('createNewModule.CreateNewModule.createSourceFile')
     @patch('createNewModule.CreateNewModule.copyAndCreateTestFiles')
     @patch('createNewModule.CreateNewModule.createTestInitFile')
-    @patch('createNewModule.CreateNewModule.copyTestCMakefile')
+    @patch('createNewModule.CreateNewModule.createTestCMakefile')
     def test_createAndCopyFiles(self,mock_make, mock_ini, mock_test, mock_source, mock_header):
         testDesc = TDDConfig.CTestPkgDescription()
         nm = createNewModule.CreateNewModule(testDesc)
@@ -573,5 +573,89 @@ class TestCreateNewModule(unittest.TestCase):
         self.assertEqual(str_dst, pf_args[0][1])
         self.assertEqual(len_dic, len(pf_args[0][2]))
 
-    def test_copyAndCreateTestFiles_cTest(self):
+    @patch('createNewModule.processFile')
+    def test_createTestInitFile_default(self, mock_pf):
+        testDesc = TDDConfig.CTestPkgDescription()
+        nm = createNewModule.CreateNewModule(testDesc)
+        nm.str_TPKG_FOLDER = 'TEST_Tpkg'
+
+        nm.createTestInitFile();
+        self.assertTrue(mock_pf.called)
+        pf_args = mock_pf.call_args
+        str_src = str(Path('Tools') / 'defaults' / 'src_templates' / 'test.ini')
+        str_dst = str(Path(nm.str_TPKG_FOLDER) / nm.pkgDesc.str_testcfgfilename)
+        len_dic = 19
+        self.assertEqual(str_src, pf_args[0][0])
+        self.assertEqual(str_dst, pf_args[0][1])
+        self.assertEqual(len_dic, len(pf_args[0][2]))
+
+    @patch('createNewModule.copyTxtFile')
+    @patch('createNewModule.processFile')
+    def test_copyAndCreateTestFiles_cTest_(self,mock_pf , mock_ctf):
+        testDesc = TDDConfig.CTestPkgDescription()
+        nm = createNewModule.CreateNewModule(testDesc)
+        nm.str_TPKG_FOLDER = 'TEST_Tpkg'
+        nm.str_LANGUAGE = 'c'
+
+        nm.copyAndCreateTestFiles()
+
+        # check call of text copy function
+        ctf_args = mock_ctf.call_args
+        str_src = str(Path('Tools') / 'defaults' / 'src_templates' / 'AllTests.cpp')
+        str_dst = str(Path(nm.str_TPKG_FOLDER) / nm.pkgDesc.str_srctestfldr / 'AllTests.cpp')
+        self.assertEqual(str_src, ctf_args[0][0])
+        self.assertEqual(str_dst, ctf_args[0][1])
+
+        # check call of processFile
+        pf_args = mock_pf.call_args
+        str_src = str(Path('Tools') / 'defaults' / 'src_templates' / 'c_test.cpp')
+        str_dst = str(Path(nm.str_TPKG_FOLDER) / nm.pkgDesc.str_srctestfldr / 'test.cpp')
+        self.assertEqual( str_src, pf_args[0][0])
+        self.assertEqual( str_dst, pf_args[0][1])
+        self.assertEqual( 5, len(pf_args[0][2]))
+        pass
+
+    @patch('createNewModule.copyTxtFile')
+    @patch('createNewModule.processFile')
+    def test_copyAndCreateTestFiles_cppTest_(self,mock_pf , mock_ctf):
+        testDesc = TDDConfig.CTestPkgDescription()
+        nm = createNewModule.CreateNewModule(testDesc)
+        nm.str_TPKG_FOLDER = 'TEST_Tpkg'
+        nm.str_LANGUAGE = 'c++'
+
+        nm.copyAndCreateTestFiles()
+
+        # check call of text copy function
+        ctf_args = mock_ctf.call_args
+        str_src = str(Path('Tools') / 'defaults' / 'src_templates' / 'AllTests.cpp')
+        str_dst = str(Path(nm.str_TPKG_FOLDER) / nm.pkgDesc.str_srctestfldr / 'AllTests.cpp')
+        self.assertEqual(str_src, ctf_args[0][0])
+        self.assertEqual(str_dst, ctf_args[0][1])
+
+        # check call of processFile
+        pf_args = mock_pf.call_args
+        str_src = str(Path('Tools') / 'defaults' / 'src_templates' / 'test.cpp')
+        str_dst = str(Path(nm.str_TPKG_FOLDER) / nm.pkgDesc.str_srctestfldr / 'test.cpp')
+        self.assertEqual( str_src, pf_args[0][0])
+        self.assertEqual( str_dst, pf_args[0][1])
+        self.assertEqual( 6, len(pf_args[0][2]))
+        pass
+
+
+    @patch('createNewModule.processFile')
+    def test_createTestCMakefile(self,mock_pf):
+        testDesc = TDDConfig.CTestPkgDescription()
+        nm = createNewModule.CreateNewModule(testDesc)
+        nm.str_TPKG_FOLDER = 'TEST_Tpkg'
+        nm.str_COMPONENT_NAME = 'TEST_PACKAGE'
+
+        nm.createTestCMakefile()
+
+        pf_args = mock_pf.call_args
+        str_src = str(Path('Tools') / 'defaults' / 'src_templates' / 'CMakeLists.txt')
+        str_dst = str(Path(nm.str_TPKG_FOLDER) /  'CMakeLists.txt')
+        self.assertEqual( str_src, pf_args[0][0])
+        self.assertEqual( str_dst, pf_args[0][1])
+        self.assertEqual( {'%TESTPACKAGENAME%': 'TEST_PACKAGE'}, pf_args[0][2])
+
         pass

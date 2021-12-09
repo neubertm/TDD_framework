@@ -195,7 +195,7 @@ class CreateNewModule():
         self.createSourceFile()
         self.copyAndCreateTestFiles()
         self.createTestInitFile()
-        self.copyTestCMakefile()
+        self.createTestCMakefile()
         pass
 
     def setModuleConfiguration(self):
@@ -342,10 +342,6 @@ class CreateNewModule():
         pass
 
 
-
-    def copyFilesToCorrectPositions(self, resLst):
-        pass
-
     def defineCoverageCfg(self):
         '''
         User can define coverage configuration.
@@ -482,10 +478,40 @@ class CreateNewModule():
         processFile(str_src,str_dst, dict)
 
 
-        pass
-
     def createTestInitFile(self):
+        pTestFldr = Path(self.str_TPKG_FOLDER)
+        if not pTestFldr.is_dir():
+            pTestFldr.mkdir()
+
+        dict = { '%SRC_FLDR%': self.str_SRC_FOLDER
+                ,'%SRC_FILENAME%': self.str_SRC_FILE
+                ,'%HEADER_FLDR%': self.str_HEADER_FOLDER
+                ,'%HEADER_FILENAME%': self.str_HEADER_FILE
+                ,'%COVERAGE_IS_USED%': self.testConfig.co_coverage.isTurnedOn
+                ,'%COVERAGE_UNCOVLISTLEN%': self.testConfig.co_coverage.uncoveredLineListLength
+                ,'%CHECKCODE_IS_USED%': self.testConfig.co_staticAnalysis.isTurnedOn
+                ,'%CHECKCODE_TOOL%': self.testConfig.co_staticAnalysis.str_tool
+                ,'%CHECKCODE_FORCEDLANG%': self.testConfig.co_staticAnalysis.str_ForcedLang
+                ,'%CHECKCODE_C_VERSION%': self.testConfig.co_staticAnalysis.str_c_version
+                ,'%CHECKCODE_CPP_VERSION%': self.testConfig.co_staticAnalysis.str_cpp_version
+                ,'%TOOLCHAIN%': self.testConfig.co_testToolchain.str_compiler
+                ,'%FRAMEWORK%': self.testConfig.co_testToolchain.str_testlib
+                ,'%STATISTICS_IS_USED%': self.testConfig.co_codeStatistics.isTurnedOn
+                ,'%STATISTICS_USE_SPECIFIC_ONLY%': self.testConfig.co_codeStatistics.isUsedTestSpecificOnly
+                ,'%STATISTICS_USE_STRICTER%': self.testConfig.co_codeStatistics.isUsedStricter
+                ,'%STATISTICS_MCCAVE_LEVEL%': self.testConfig.co_codeStatistics.int_mccabeComplex
+                ,'%STATISTICS_FNCLEN_LEVEL%': self.testConfig.co_codeStatistics.int_fncLength
+                ,'%STATISTICS_PARAM_CNT%': self.testConfig.co_codeStatistics.int_paramCnt
+                }
+
+        str_src = str(Path('Tools') / 'defaults' / 'src_templates' / 'test.ini')
+        str_dst = str(pTestFldr / self.pkgDesc.str_testcfgfilename)
+        processFile(str_src,str_dst,dict)
         pass
 
-    def copyTestCMakefile(self):
+    def createTestCMakefile(self):
+        dict = {'%TESTPACKAGENAME%': self.str_COMPONENT_NAME}
+        str_src = str(Path('Tools') / 'defaults' / 'src_templates' / 'CMakeLists.txt')
+        str_dst = str(Path(self.str_TPKG_FOLDER) / 'CMakeLists.txt')
+        processFile(str_src,str_dst,dict)
         pass
