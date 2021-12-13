@@ -584,7 +584,7 @@ class CTestPkg():
             self.str_uncoverage = Fore.YELLOW + "OFF" + Style.RESET_ALL
 
     def __staticCheck__(self, sutList: [str]):
-        if self.tCfg.co_codeStatistics.isTurnedOn:
+        if self.tCfg.co_staticAnalysis.isTurnedOn:
             self.__writeStep__("StaticCheck")
             op_lst = []
             op_lst.append("cppcheck")
