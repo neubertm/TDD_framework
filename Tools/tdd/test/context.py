@@ -11,3 +11,5 @@ import mainMenu
 import createNewModule
 import versionSupport
 import TDDConfig
+import testAllPkgs
+import tdd_support

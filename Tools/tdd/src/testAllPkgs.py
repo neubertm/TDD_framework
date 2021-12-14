@@ -47,6 +47,20 @@ import keyboard
 import cmakeSupport
 
 
+def assertWithText(condition, text):
+    '''
+    Assertion wrapping function
+    '''
+    assert condition, text
+
+def removeDirectory(path: Path):
+    '''
+    Function for removing directory
+    '''
+    if path.is_dir():
+        tdd_support.del_folder(path)
+        assertWithText(not path.is_dir(), "Something went wrong. Path(%s) was not deleted!" % (str(path)))
+
 def testOnePkg(pckgDir, mCfg):
     print(pckgDir)
 
@@ -307,8 +321,9 @@ class CTestPkg():
     str_analysis: str
     str_complexity: str
     path_buildFldr: Path
+    path_TpkgRoot: Path
     str_srcFldr: str
-    str_testRoot: str
+    str_TpkgRoot: str
     tCfg: TDDConfig.CTestConfig
     b_silent: bool
     str_cmakeName: str
@@ -329,8 +344,9 @@ class CTestPkg():
         self.str_testStatus = "Empty"
         self.str_analysis = "Empty"
         self.str_complexity = "Empty"
-        self.str_testRoot = ""
         self.path_buildFldr = Path("")
+        self.path_TpkgRoot = Path(self.mCfg.co_pkg.str_testpath) / self.name
+        self.str_TpkgRoot = str(self.path_TpkgRoot)
         self.str_srcFldr = ""
         self.tCfg = TDDConfig.CTestConfig()
         self.b_silent = False
@@ -344,12 +360,15 @@ class CTestPkg():
         self.thread_keyPress = kpt
         # self.start()
 
+    def __getBuildFolderName__(self):
+        return self.tCfg.co_testToolchain.str_compiler + self.mCfg.co_pkg.str_buildsuffix + "_" + self.str_testType
+
+    def __getBuildFolderPath__(self):
+        return self.path_TpkgRoot / self.__getBuildFolderName__()
+
     def __readInit__(self):
         self.__writeStep__("Read inifile")
-        path_folder = Path(self.mCfg.co_pkg.str_testpath) / self.name
-        self.str_testRoot = str(path_folder)
-
-        iniFile = path_folder / self.mCfg.co_pkg.str_testcfgfilename
+        iniFile = self.path_TpkgRoot / self.mCfg.co_pkg.str_testcfgfilename
         self.tCfg.readCfgFile(str(iniFile))
         pass
 
@@ -384,17 +403,13 @@ class CTestPkg():
         self.dic_chckFiles = {
             chckF: os.stat(chckF).st_mtime for chckF in self.LS_chckLFile}
 
-        compilerName = self.tCfg.co_testToolchain.str_compiler
         # self.str_srcFldr
         self.str_srcFldr = tdd_support.getSrcTestTempFolderName(
             self.tCfg, self.mCfg, self.str_testType)
 
-        bFldr = compilerName + self.mCfg.co_pkg.str_buildsuffix + "_" + self.str_testType
-        path_folder = Path(self.mCfg.co_pkg.str_testpath) / self.name
-        self.path_buildFldr = path_folder / bFldr
-        if self.path_buildFldr.is_dir():
-            tdd_support.del_folder(self.path_buildFldr)
-            pass
+        self.path_buildFldr = self.__getBuildFolderPath__()
+
+        removeDirectory(self.path_buildFldr)
 
         self.path_buildFldr.mkdir()
         pass
@@ -414,7 +429,7 @@ class CTestPkg():
         op_cmakeLst.append("cmake")
         # root folder (position of cmakefile)
         op_cmakeLst.append("-S")
-        op_cmakeLst.append(self.str_testRoot)
+        op_cmakeLst.append(self.str_TpkgRoot)
 
         op_cmakeLst.append("-B")
         op_cmakeLst.append(str(self.path_buildFldr))
@@ -522,7 +537,7 @@ class CTestPkg():
             covCmdLst.append(
                 str(Path("CMakeFiles") / "TestApp.dir" / self.str_srcFldr))
             for sutCovListItem in sutList:
-                covCmdLst.append(str(Path(self.str_testRoot, sutCovListItem)))
+                covCmdLst.append(str(Path(self.str_TpkgRoot, sutCovListItem)))
 
             covCmdLst.append(">")
             covCmdLst.append("coverage.out")
@@ -752,11 +767,8 @@ class CTestPkg():
         path_srcFldr = Path(self.mCfg.co_pkg.str_testpath) / self.name / tdd_support.getSrcTestTempFolderName(
             self.tCfg, self.mCfg, self.str_testType)
 
-        # print(str(path_srcFldr.resolve()))
-        if path_srcFldr.is_dir():
-            # print("Deleting tmp source folder :" + str(path_srcFldr.resolve()))
-            tdd_support.del_folder(path_srcFldr)
-        assert not path_srcFldr.is_dir(), "Something went wrong. Temp source was not deleted!"
+        removeDirectory(path_srcFldr)
+
 
     def __checkSrcFileChanged__(self):
         locdic_chckFiles = {
@@ -770,6 +782,12 @@ class CTestPkg():
         if not self.b_silent:
             tdd_support.clear()
 
+    def __automocks__(self):
+        pass
+
+    def __updateAutomocks__(self):
+        pass
+
     def __runTest__(self):
         b_buildStatus = False
         self.__writeStep__("Start")
@@ -778,6 +796,7 @@ class CTestPkg():
         self.__createCmake__()
         self.__cleanTmpSource__()
         self.__fileCopying__()
+        self.__automocks__()
         self.__cmake__()
         while True:
             b_buildStatus = self.__make__()
@@ -800,6 +819,7 @@ class CTestPkg():
                 if self.__checkSrcFileChanged__():
                     self.__cleanStatusVariables__()
                     self.__fileCopyingUpdatedOnly__()
+                    self.__updateAutomocks__()
                     self.__cleanScreenBeforeRerun__()
                     break
 

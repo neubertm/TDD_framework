@@ -455,11 +455,13 @@ class CFormaterGuidelineCheckerCfg(CBaseToolCfg):
 class CTestToolchainCfg(CBaseToolCfg):
     str_compiler: str
     str_testlib:  str
+    str_automock: str
 
     def __init__(self):
         CBaseToolCfg.__init__(self, "TOOLCHAIN")
         self.str_compiler = "gcc"
         self.str_testlib = "cpputest"
+        self.str_automock = 'cppumockgen'
 
     def _read_(self, CPS: ConfigParser):
         if self.str_sectionName in CPS.keys():
@@ -468,6 +470,9 @@ class CTestToolchainCfg(CBaseToolCfg):
                 self.str_testlib = CPS_SEC['framework']
             if 'toolchain' in CPS_SEC:
                 self.str_compiler = CPS_SEC['toolchain']
+            if 'automock' in CPS_SEC:
+                self.str_automock = CPS_SEC['automock']
+
 
 
 class CCodeStatisticsCfg(CBaseToolCfg, CCodeStatParamMinValue):
@@ -506,6 +511,8 @@ class CCodeStatisticsCfg(CBaseToolCfg, CCodeStatParamMinValue):
 class CTestConfig:
     SUT_dict: {str: str}
     OTHER_dict: {str: str}
+    AUTOMOCK_dict: {str: str}
+    AUTOMOCKFLDRINC_lst: [str]
     co_coverage: CCovCfg
     co_staticAnalysis: CStaticAnalysisCfg
     co_guidelineFormat: CFormaterGuidelineCheckerCfg
@@ -516,6 +523,8 @@ class CTestConfig:
     def __init__(self):
         self.SUT_dict = {}
         self.OTHER_dict = {}
+        self.AUTOMOCK_dict = {}
+        self.AUTOMOCKFLDRINC_lst = []
         self.co_coverage = CCovCfg()
         self.co_staticAnalysis = CStaticAnalysisCfg()
         self.co_guidelineFormat = CFormaterGuidelineCheckerCfg()
@@ -528,8 +537,15 @@ class CTestConfig:
         assert 'SUT' in CPS, "Assertion missing SUT section in test configuration file %s" % (
             str_fName)
         self.SUT_dict = dict(CPS['SUT'])
+
         if 'OTHER' in CPS:
             self.OTHER_dict = dict(CPS['OTHER'])
+
+        if 'AUTOMOCK' in CPS:
+            self.AUTOMOCK_dict = dict(CPS['AUTOMOCK'])
+
+        if 'AUTOMOCKFLDRINC' in CPS:
+            self.AUTOMOCKFLDRINC_lst = list(dict(CPS['AUTOMOCKFLDRINC']).keys())
         # print(self.SUT_dict)
         # print(self.OTHER_dict)
         self.co_coverage._read_(CPS)
