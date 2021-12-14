@@ -512,6 +512,7 @@ class CTestConfig:
     SUT_dict: {str: str}
     OTHER_dict: {str: str}
     AUTOMOCK_dict: {str: str}
+    AUTOMOCKCPP_dict: {str: str}
     AUTOMOCKFLDRINC_lst: [str]
     co_coverage: CCovCfg
     co_staticAnalysis: CStaticAnalysisCfg
@@ -524,6 +525,7 @@ class CTestConfig:
         self.SUT_dict = {}
         self.OTHER_dict = {}
         self.AUTOMOCK_dict = {}
+        self.AUTOMOCKCPP_dict = {}
         self.AUTOMOCKFLDRINC_lst = []
         self.co_coverage = CCovCfg()
         self.co_staticAnalysis = CStaticAnalysisCfg()
@@ -543,6 +545,9 @@ class CTestConfig:
 
         if 'AUTOMOCK' in CPS:
             self.AUTOMOCK_dict = dict(CPS['AUTOMOCK'])
+
+        if 'AUTOMOCKCPP' in CPS:
+            self.AUTOMOCKCPP_dict = dict(CPS['AUTOMOCKCPP'])
 
         if 'AUTOMOCKFLDRINC' in CPS:
             self.AUTOMOCKFLDRINC_lst = list(dict(CPS['AUTOMOCKFLDRINC']).keys())
