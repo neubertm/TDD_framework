@@ -13,3 +13,4 @@ import versionSupport
 import TDDConfig
 import testAllPkgs
 import tdd_support
+import cmakeSupport

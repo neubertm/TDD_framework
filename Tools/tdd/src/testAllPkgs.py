@@ -44,7 +44,7 @@ import subprocess
 import KeyPressThread
 import keyboard
 # import sys
-import cmakeSupport
+import cmakeSupport as CS
 
 
 def assertWithText(condition, text):
@@ -337,7 +337,7 @@ class CTestPkg():
         # super(CTestPkg, self).__init__(name=name)
         self.mCfg = mainCfg
         self.name = name
-        self.str_testBinName = cmakeSupport.getTestBinaryName()
+        self.str_testBinName = CS.getTestBinaryName()
         self.str_step = "Created"
         self.str_status = "Ready"
         self.str_uncoverage = "Empty"
@@ -388,7 +388,7 @@ class CTestPkg():
             except BaseException:
                 print('Error: removing CMakeLists.txt failed.')
         self.__writeStep__("Creating CMakeLists")
-        tdd_support.createCMakeListsFromConfiguration(
+        CS.createCMakeListsFromConfiguration(
             str_cmakelist, self.mCfg, self.tCfg, self.str_testType)
         pass
 
@@ -435,7 +435,9 @@ class CTestPkg():
         op_cmakeLst.append(str(self.path_buildFldr))
 
         op_cmakeLst.append("-G")
-        op_cmakeLst.append(cmakeSupport.getGeneratorName(self.tCfg))
+        op_cmakeLst.append(CS.getGeneratorName(self.tCfg))
+
+        op_cmakeLst.append("-DTDD_FRAMEWORK_ROOT_DIR=%s" % str(Path.cwd()))
 
         op_cmakeLst.append("-DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=ON")
 
@@ -464,7 +466,7 @@ class CTestPkg():
                 pass
         op_makeLst = []
 
-        op_makeLst.append(cmakeSupport.getMaketoolName(self.tCfg))
+        op_makeLst.append(CS.getMaketoolName(self.tCfg))
 
         op_makeLst.append('-C')
         op_makeLst.append(str(self.path_buildFldr))

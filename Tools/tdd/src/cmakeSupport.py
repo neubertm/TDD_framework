@@ -30,8 +30,17 @@
 ###############################################################################
 
 from TDDConfig import CTestConfig
-import os
+from TDDConfig import CMainConfig
 
+
+import os
+from pathlib import Path
+
+def assertUnexpectedBehavior(text):
+    assertWithText(False, text)
+
+def assertWithText(condition, text):
+    assert condition, text
 
 def getGeneratorName(tcfg: CTestConfig):
     dict = {'gcc': "Unix Makefiles",
@@ -66,3 +75,241 @@ def getTestBinaryName():
 
     # for other normal system
     return("TestApp")
+
+
+def createCMakeListsFromConfiguration(fileName: str, mainCfg: CMainConfig(), testCfg: CTestConfig, str_tType: str):
+    """This function generate CMakelists file."""
+    sep = mainCfg.separ
+    with open(fileName, "w") as cmFile:
+        # start of CMakeLists is version of CMakeLists. We have to confirm but
+        # i expect we can use very old version
+        writeToCMakefileMinimalRequiredVersion(cmFile, 3.00)
+
+        # Add switches to generate gcov files
+        writeToCMakefileCoverageSection(cmFile,testCfg)
+
+
+        # next include macro header is code injection in to production code. Overriding malloc and operator new.
+        writeToCMakefileUsageOfMemLeakDetectionMacros(cmFile, testCfg)
+        # memLeakDetectionInclude = getPathToMemoryLeakDetectionMacros(testCfg)
+        # cmFile.write('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%r' % str(memLeakDetectionInclude / "MemoryLeakDetectorNewMacros.h")))
+        # cmFile.write('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%r' % str(memLeakDetectionInclude / "MemoryLeakDetectorMallocMacros.h")))
+        # cmFile.write("SET(CMAKE_C_FLAGS  \"${CMAKE_C_FLAGS} -include %s\")\n\n" % ('%r' % str(memLeakDetectionInclude / "MemoryLeakDetectorMallocMacros.h")))
+
+        # this generate root folder of test compilation, all files for
+        # compilation have to placed here.
+        tmpTestSrcFldr = getSrcTestTempFolderName(
+            testCfg, mainCfg, str_tType)
+        # add executable
+        writeToCMakefileAddExecutableSection(cmFile, testCfg, mainCfg, tmpTestSrcFldr)
+
+        # add include directories
+        writeToCMakefileAddIncludeDirs(cmFile, testCfg, tmpTestSrcFldr)
+
+
+        ##
+        str_compilerName = testCfg.co_testToolchain.str_compiler
+        pathToTestLibs = Path.cwd() / "Tools" / "testlibs" / \
+            testCfg.co_testToolchain.str_testlib / str_compilerName
+
+        strPathToTestLibs = '%r' % str(pathToTestLibs)
+        strPathToTestLibs = strPathToTestLibs[1:-1]
+        cmFile.write(
+            'find_library(TestLib    libCppUTest    "'
+            + strPathToTestLibs + '")\n'
+        )
+        cmFile.write(
+            'find_library(TestLibExt libCppUTestExt "'
+            + strPathToTestLibs + '")\n\n'
+        )
+
+        # add target link library
+        cmFile.write(
+            "target_link_libraries(TestApp ${TestLib}" " ${TestLibExt})\n")
+
+def writeToCMakefileMinimalRequiredVersion(openedFileW, fNumber):
+    openedFileW.write("cmake_minimum_required(VERSION %.2f)\n\n" % (fNumber))
+
+def writeToCMakefileCoverageSection(cmFile, testCfg: CTestConfig):
+    if testCfg.co_coverage.isTurnedOn:
+        cmFile.write(
+            'SET(GCC_COVERAGE_COMPILE_FLAGS "-g -O0 -coverage'
+            ' -fprofile-arcs -ftest-coverage")\n'
+        )
+        cmFile.write(
+            'SET(GCC_COVERAGE_LINK_FLAGS    "-coverage -lgcov")' "\n")
+        cmFile.write(
+            'SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS}'
+            " ${GCC_COVERAGE_COMPILE_FLAGS} -std=c++11 -Wall -Werror"
+            ' -pedantic")\n'
+        )
+        cmFile.write(
+            'SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS}'
+            ' ${GCC_COVERAGE_COMPILE_FLAGS} -Wall -Werror -pedantic")\n'
+        )
+        cmFile.write('SET(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE ON)\n')
+        cmFile.write('SET(CMAKE_C_OUTPUT_EXTENSION_REPLACE ON)\n')
+
+        cmFile.write(
+            "SET( CMAKE_EXE_LINKER_FLAGS  "
+            '"${CMAKE_EXE_LINKER_FLAGS} '
+            '${GCC_COVERAGE_LINK_FLAGS}" )\n'
+        )
+
+def getSrcTestTempFolderName(testCfg: CTestConfig, mainCfg: CMainConfig, str_tType: str):
+    """Function create string for temporary test folder."""
+    toolchain_str = testCfg.co_testToolchain.str_compiler
+    suff = mainCfg.co_pkg.str_srctmp_suffix
+    return toolchain_str + suff + "_" + str_tType
+
+def getPathToRootOfIncludeForTestLib(testCfg: CTestConfig):
+
+    #TODO this is incorrect can cause crash, because test folder could be in different position
+    #TODO should looks like relative from ${CMAKE_SOURCE_DIR} to root of TDD_framework and to include folder
+    return  Path('${TDD_FRAMEWORK_ROOT_DIR}')/ "Tools" / "testlibs" / \
+        testCfg.co_testToolchain.str_testlib / "include"
+
+def getPathToMemoryLeakDetectionMacros(testCfg: CTestConfig):
+    pIncludeDir = getPathToRootOfIncludeForTestLib(testCfg)
+    return pIncludeDir / 'CppUTest'
+
+def writeToCMakefileUsageOfMemLeakDetectionMacros(cmFile, testCfg):
+    memLeakDetectionInclude = getPathToMemoryLeakDetectionMacros(testCfg)
+    if 'cpputest' == testCfg.co_testToolchain.str_testlib:
+        cmFile.write('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%r' % str(memLeakDetectionInclude / "MemoryLeakDetectorNewMacros.h")))
+        cmFile.write('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%r' % str(memLeakDetectionInclude / "MemoryLeakDetectorMallocMacros.h")))
+        cmFile.write("SET(CMAKE_C_FLAGS  \"${CMAKE_C_FLAGS} -include %s\")\n\n" % ('%r' % str(memLeakDetectionInclude / "MemoryLeakDetectorMallocMacros.h")))
+    else:
+        assertUnexpectedBehavior('Wrong testlib %s' % (testCfg.co_testToolchain.str_testlib))
+
+def writeToCMakefileAddExecutableStart(cmFile):
+    cmFile.write("add_executable(TestApp\n")
+
+def writeToCMakefileAddExecutableSutFiles(cmFile, testCfg, mainCfg, tmpTestSrcFldr):
+    sut = testCfg.SUT_dict
+    sep = mainCfg.separ
+    # for all SUT file
+    for key in sut:
+        # exclude header files
+        if not (key.split(sep)[-1].split(".")[-1] in mainCfg.hsuffix):
+            if sut[key].split(sep)[-1]:
+                # this is work if we define path only
+                pathFile = Path("${CMAKE_SOURCE_DIR}") / sut[key].replace("SRC_TEMP", tmpTestSrcFldr) / key.split(sep)[-1]
+                strPathFile = '%s' % str(pathFile.as_posix())
+                cmFile.write(
+                    "\t"
+                    + strPathFile
+                    + "\n"
+                    )
+            else:
+                # this is used when is used path with name
+                pathFile = Path("${CMAKE_SOURCE_DIR}") / sut[key].replace("SRC_TEMP", tmpTestSrcFldr)
+                strPathFile = '%s' % str(pathFile.as_posix())
+                cmFile.write(
+                    "\t"
+                    + strPathFile
+                    + "\n"
+                    )
+
+
+def writeToCMakefileAddExecutableOtherFiles(cmFile, testCfg, mainCfg, tmpTestSrcFldr):
+    other = testCfg.OTHER_dict
+    sep = mainCfg.separ
+    # print(other)
+    for key in other:
+        # check if it is header file
+        if not (key.split(sep)[-1].split(".")[-1] in mainCfg.hsuffix):
+            # check if use specify position of file in test environment
+            if "SRC_TEMP" in other[key]:
+                pathFile = Path("${CMAKE_SOURCE_DIR}") / other[key].replace("SRC_TEMP", tmpTestSrcFldr) / key.split(sep)[-1]
+                strPathFile = '%s' % str(pathFile.as_posix())
+                cmFile.write(
+                    "\t"
+                    + strPathFile
+                    + "\n"
+                    )
+            else:
+                # non default -> store in default src folder
+                if other[key].split(sep)[-1]:
+                    pathFile = Path("${CMAKE_SOURCE_DIR}") / other[key].replace("SRC_TEMP", tmpTestSrcFldr)
+                    strPathFile = '%s' % str(pathFile.as_posix())
+                    cmFile.write(
+                        "\t"
+                        + strPathFile
+                        + "\n"
+                        )
+
+
+def writeToCMakefileAddExecutableEnd(cmFile):
+    cmFile.write("\t)\n\n")
+
+
+def writeToCMakefileAddExecutableCoreTestFiles(cmFile, testCfg, mainCfg, tmpTestSrcFldr):
+    # add file with test description
+    sep = mainCfg.separ
+    # this files are dependent of test library/framework
+    if 'cpputest' == testCfg.co_testToolchain.str_testlib:
+        pathFile = Path("${CMAKE_SOURCE_DIR}") / tmpTestSrcFldr / 'test.cpp'
+        strPathFile = '%s' % str(pathFile.as_posix())
+        cmFile.write(
+            "\t"
+            + strPathFile
+            + "\n"
+            )
+
+        pathFile = Path("${CMAKE_SOURCE_DIR}") / tmpTestSrcFldr / 'AllTests.cpp'
+        strPathFile = '%s' % str(pathFile.as_posix())
+        cmFile.write(
+            "\t"
+            + strPathFile
+            + "\n"
+            )
+    else:
+        assertUnexpectedBehavior('Wrong testlib %s' % (testCfg.co_testToolchain.str_testlib))
+
+def writeToCMakefileAddExecutableSection(cmFile, testCfg, mainCfg, tmpTestSrcFldr):
+    # # open add_executable
+    writeToCMakefileAddExecutableStart(cmFile)
+
+    # # add all files from SUT except headers
+    writeToCMakefileAddExecutableSutFiles(cmFile, testCfg, mainCfg, tmpTestSrcFldr)
+
+    # # add all source files in OTHER sections
+    writeToCMakefileAddExecutableOtherFiles(cmFile, testCfg, mainCfg, tmpTestSrcFldr)
+
+    # add file with test description
+    writeToCMakefileAddExecutableCoreTestFiles(cmFile, testCfg, mainCfg, tmpTestSrcFldr)
+
+    #close section for adding executables
+    writeToCMakefileAddExecutableEnd(cmFile)
+
+def writeToCMakefileAddIncludeDirsStart(cmFile):
+    cmFile.write("include_directories(" + "\n")
+
+def writeToCMakefileAddIncludeDirsEnd(cmFile):
+    cmFile.write("\t)\n\n")
+
+
+def writeToCMakefileAddIncludeDirsImportantFolders(cmFile, testCfg: CTestConfig, tmpTestSrcFldr):
+    pathFile = Path("${CMAKE_SOURCE_DIR}") / tmpTestSrcFldr
+    strPathFile = '%s' % str(pathFile.as_posix())
+    cmFile.write(
+        "\t"
+        + strPathFile
+        + "\n"
+        )
+
+    pIncludeDir = getPathToRootOfIncludeForTestLib(testCfg)
+    strVl = '%s' % str(pIncludeDir.as_posix())
+    cmFile.write("\t" + strVl + "\n")
+
+
+
+def writeToCMakefileAddIncludeDirs(cmFile, testCfg, tmpTestSrcFldr):
+    writeToCMakefileAddIncludeDirsStart(cmFile)
+
+    # # add source folder
+    writeToCMakefileAddIncludeDirsImportantFolders(cmFile, testCfg, tmpTestSrcFldr)
+
+
+    writeToCMakefileAddIncludeDirsEnd(cmFile)

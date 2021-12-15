@@ -50,9 +50,17 @@ IF ERRORLEVEL 1 (
     ECHO Python exists. Let's go!
 )
 
-python -m unittest test\test_startTddTool.py
-python -m unittest test\test_createNewModule.py
-python -m unittest test\test_versionSupport.py
+
+rem echo Test: startTddTool.py
+rem python -m unittest test\test_startTddTool.py
+rem echo Test: createNewModule.py
+rem python -m unittest test\test_createNewModule.py
+rem echo Test: versionSupport.py
+rem python -m unittest test\test_versionSupport.py
+echo Test: TDDConfig.py
+python -m unittest test\test_TDDConfig.py
+echo Test: testAllPkgs.py
+python -m unittest test\test_testAllPkgs.py
 
 
 pause
