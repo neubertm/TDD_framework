@@ -108,24 +108,10 @@ def createCMakeListsFromConfiguration(fileName: str, mainCfg: CMainConfig(), tes
 
 
         ##
-        str_compilerName = testCfg.co_testToolchain.str_compiler
-        pathToTestLibs = Path.cwd() / "Tools" / "testlibs" / \
-            testCfg.co_testToolchain.str_testlib / str_compilerName
+        writeToCMakefileAddFindLinkTestLibrary(cmFile, testCfg)
 
-        strPathToTestLibs = '%r' % str(pathToTestLibs)
-        strPathToTestLibs = strPathToTestLibs[1:-1]
-        cmFile.write(
-            'find_library(TestLib    libCppUTest    "'
-            + strPathToTestLibs + '")\n'
-        )
-        cmFile.write(
-            'find_library(TestLibExt libCppUTestExt "'
-            + strPathToTestLibs + '")\n\n'
-        )
 
-        # add target link library
-        cmFile.write(
-            "target_link_libraries(TestApp ${TestLib}" " ${TestLibExt})\n")
+
 
 def writeToCMakefileMinimalRequiredVersion(openedFileW, fNumber):
     openedFileW.write("cmake_minimum_required(VERSION %.2f)\n\n" % (fNumber))
@@ -176,9 +162,9 @@ def getPathToMemoryLeakDetectionMacros(testCfg: CTestConfig):
 def writeToCMakefileUsageOfMemLeakDetectionMacros(cmFile, testCfg):
     memLeakDetectionInclude = getPathToMemoryLeakDetectionMacros(testCfg)
     if 'cpputest' == testCfg.co_testToolchain.str_testlib:
-        cmFile.write('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%r' % str(memLeakDetectionInclude / "MemoryLeakDetectorNewMacros.h")))
-        cmFile.write('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%r' % str(memLeakDetectionInclude / "MemoryLeakDetectorMallocMacros.h")))
-        cmFile.write("SET(CMAKE_C_FLAGS  \"${CMAKE_C_FLAGS} -include %s\")\n\n" % ('%r' % str(memLeakDetectionInclude / "MemoryLeakDetectorMallocMacros.h")))
+        cmFile.write('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%s' % str((memLeakDetectionInclude / "MemoryLeakDetectorNewMacros.h").as_posix())))
+        cmFile.write('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%s' % str((memLeakDetectionInclude / "MemoryLeakDetectorMallocMacros.h").as_posix())))
+        cmFile.write("SET(CMAKE_C_FLAGS  \"${CMAKE_C_FLAGS} -include %s\")\n\n" % ('%s' % str((memLeakDetectionInclude / "MemoryLeakDetectorMallocMacros.h").as_posix())))
     else:
         assertUnexpectedBehavior('Wrong testlib %s' % (testCfg.co_testToolchain.str_testlib))
 
@@ -313,3 +299,19 @@ def writeToCMakefileAddIncludeDirs(cmFile, testCfg, tmpTestSrcFldr):
 
 
     writeToCMakefileAddIncludeDirsEnd(cmFile)
+
+
+def writeToCMakefileAddFindLinkTestLibrary(cmFile, testCfg: CTestConfig):
+    str_compilerName = testCfg.co_testToolchain.str_compiler
+    pathToTestLibs = Path('${TDD_FRAMEWORK_ROOT_DIR}') / "Tools" / "testlibs" / \
+        testCfg.co_testToolchain.str_testlib / str_compilerName
+
+    strPathToTestLibs = '%s' % str(pathToTestLibs.as_posix())
+    cmFile.write( 'find_library(TestLib    libCppUTest %s)\n' % (strPathToTestLibs)
+    )
+    cmFile.write(
+        'find_library(TestLibExt libCppUTestExt %s)\n\n' % (strPathToTestLibs)
+    )
+
+    # add target link library
+    cmFile.write("target_link_libraries(TestApp ${TestLib} ${TestLibExt})\n")
