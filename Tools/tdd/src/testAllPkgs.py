@@ -388,8 +388,8 @@ class CTestPkg():
             except BaseException:
                 print('Error: removing CMakeLists.txt failed.')
         self.__writeStep__("Creating CMakeLists")
-        CS.createCMakeListsFromConfiguration(
-            str_cmakelist, self.mCfg, self.tCfg, self.str_testType)
+        cmakeGen = CS.CCMakeGenerator(str_cmakelist, self.str_testType,self.mCfg, self.tCfg )
+        cmakeGen.generate()
         pass
 
     def __fileCopying__(self):
