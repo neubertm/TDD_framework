@@ -396,7 +396,7 @@ class CTestPkg():
         self.__writeStep__("Copy files")
 
         # copy all files and create lists
-        self.LS_srcL, self.LS_dstL, self.LS_chckLFile = tdd_support.copyAllFilesAndReturnListOfThem(
+        self.LS_srcL, self.LS_dstL, self.LS_chckLFile = tdd_support.processAllFilesAndReturnListOfThem(
             self.name, self.mCfg, self.tCfg, self.str_testType)
 
         # create dictionary key is chckLFile, value status_time

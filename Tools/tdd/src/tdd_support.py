@@ -134,7 +134,7 @@ def getCompilerNameInTestConfig(testCfg: CTestConfig):
 
 
 
-def copyAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, testCfg: CTestConfig, str_tType: str):
+def processAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, testCfg: CTestConfig, str_tType: str):
     # Create listOfSource and listOfDestination
     srcLst = []
     dstLst = []
@@ -146,24 +146,32 @@ def copyAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, test
     pPathToTmpTestSrcFldr = Path(mainCfg.co_pkg.str_testpath) / str_pkgName
     strPathToTmpTestSrcFldr = str(pPathToTmpTestSrcFldr)
     pTmpTestSrcFullPath = pPathToTmpTestSrcFldr / tmpTestSrcFldr
-    strTmpTestSrcFullPath = str(pTmpTestSrcFullPath)
+    str_TstSrcPth = str(pTmpTestSrcFullPath)
 
     # # start with SUT
-    sut = testCfg.SUT_dict
-    for key in sut:
+    dict = testCfg.SUT_dict
+    for key in dict:
+        # adding processed path from key to srcLst
         srcLst.append(
             str(Path(key.replace("SRCFLDR", mainCfg.co_pkg.str_srcfldr))))
-        if "SRC_TEMP" in sut[key]:
-            dstLst.append(
-                str(
-                    Path(sut[key].replace("SRC_TEMP", strTmpTestSrcFullPath))
-                    / Path(key).name
-                )
-            )
-        else:
-            if sut[key].split(mainCfg.separ)[-1]:
-                dstLst.append(sut[key].replace(
-                    "SRC_TEMP", strTmpTestSrcFullPath))
+        #get key as Path
+        pathFileSrc = Path(key)
+        #extract source pure name
+        fileNameSrc = pathFileSrc.name
+        #purename for src and dst is same
+        fileNameDst = fileNameSrc
+        #get destination as Path
+        pathFileDst = Path(dict[key])
+
+        fileNameDst = pathFileDst.name
+        fileNameDstSuffix = pathFileDst.suffix
+        # here we check if in key is file name or only path
+        pathFileDst = Path(dict[key].replace("SRC_TEMP", str_TstSrcPth))
+        if '' == fileNameDstSuffix:
+            # here we have only path, so we use pure name of source file
+            pathFileDst = pathFileDst / fileNameSrc
+
+        dstLst.append( str(pathFileDst) )
 
     # print("\n", srcLst, "\n")
     # print("\n", dstLst, "\n")
@@ -174,14 +182,14 @@ def copyAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, test
     for key in other:
         keyStr = (
             key.replace("SRCFLDR", mainCfg.co_pkg.str_srcfldr)
-            .replace("SRC_TEMP", strTmpTestSrcFullPath)
+            .replace("SRC_TEMP", str_TstSrcPth)
             .replace("TPKG_FOLDER", strPathToTmpTestSrcFldr)
         )
         valStr = (
             other[key]
             .replace("TESTPATH", mainCfg.co_pkg.str_testpath)
             .replace("TPKG_FOLDER", strPathToTmpTestSrcFldr)
-            .replace("SRC_TEMP", strTmpTestSrcFullPath)
+            .replace("SRC_TEMP", str_TstSrcPth)
         )
 
         # check if valStr contain specific destination folderPath
@@ -190,7 +198,8 @@ def copyAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, test
         # print(keyStr)
         # print(valStr)
         if len(pathDst.parts) > 0:  # unempty list path
-            if len(pathDst.name.split(".")) < 2:
+            #if len(pathDst.name.split(".")) < 2:
+            if '' == pathDst.suffix:
                 pathDst = pathDst / pathSrc.name
         srcLst.append(str(pathSrc))
         dstLst.append(str(pathDst))
@@ -218,6 +227,7 @@ def copyAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, test
     assert len(srcLst) == len(dstLst), (
         "Source list and Destination list" "must have the same lenght!"
     )
+
     for iter in range(len(srcLst)):
         dPath = Path(dstLst[iter]).parent
         if not dPath.exists():
@@ -230,6 +240,7 @@ def copyAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, test
     chckLst = srcLst.copy()
     chckLst.append(str(pPathToTmpTestSrcFldr
                    / mainCfg.co_pkg.str_testcfgfilename))
+    # TODO add section with creating Automocks and create new lists for that
     return srcLst, dstLst, chckLst
 
 
