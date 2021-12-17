@@ -79,7 +79,6 @@ def getTestBinaryName():
 
 def createCMakeListsFromConfiguration(fileName: str, mainCfg: CMainConfig(), testCfg: CTestConfig, str_tType: str):
     """This function generate CMakelists file."""
-    sep = mainCfg.separ
     with open(fileName, "w") as cmFile:
         # start of CMakeLists is version of CMakeLists. We have to confirm but
         # i expect we can use very old version
