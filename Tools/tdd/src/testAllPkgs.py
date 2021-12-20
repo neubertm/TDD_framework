@@ -31,6 +31,7 @@
 
 import threading
 import TDDConfig
+from TDDConfig import CEnvCfg
 import tdd_support
 import readchar
 import os
@@ -47,6 +48,9 @@ import keyboard
 import cmakeSupport as CS
 
 
+env_bckp = os.environ.copy()
+
+
 def assertWithText(condition, text):
     '''
     Assertion wrapping function
@@ -61,15 +65,26 @@ def removeDirectory(path: Path):
         tdd_support.del_folder(path)
         assertWithText(not path.is_dir(), "Something went wrong. Path(%s) was not deleted!" % (str(path)))
 
+def backUpEnvVariable():
+    env_bckp = os.environ.copy()
+
+def setEnvVariable(co_env: CEnvCfg):
+    os.environ['PATH'] = co_env.str_cmake + ";" + os.environ['PATH']
+    os.environ['PATH'] = co_env.str_mingw + ";" + os.environ['PATH']
+    os.environ['PATH'] = co_env.str_cppcheck + ";" + os.environ['PATH']
+    os.environ['PATH'] = co_env.str_clang + ";" + os.environ['PATH']
+
+def resetEnvVariable():
+    os.environ = env_bckp
+
+
 def testOnePkg(pckgDir, mCfg):
     print(pckgDir)
 
     kpt = KeyPressThread.KeyboardThread()
 
-    env_bckp = os.environ.copy()
-    os.environ['PATH'] = mCfg.co_env.str_cmake + ";" + os.environ['PATH']
-    os.environ['PATH'] = mCfg.co_env.str_mingw + ";" + os.environ['PATH']
-    os.environ['PATH'] = mCfg.co_env.str_cppcheck + ";" + os.environ['PATH']
+    backUpEnvVariable()
+    setEnvVariable(mCfg.co_env)
 
     str_testPackagesPath = mCfg.co_pkg.str_testpath
     str_testPackageSuffix = mCfg.co_pkg.str_testfldr_suffix
@@ -94,7 +109,7 @@ def testOnePkg(pckgDir, mCfg):
     pTask.run()
 
     # revert environment varaiables
-    os.environ = env_bckp
+    resetEnvVariable()
 
     print("Press any key to quit.\n")
     # keyboard.read_key()
@@ -111,10 +126,8 @@ def debug(lstPackage, mainCfg):
 
 def tests_minimized(lstPackage, mainCfg):
     colorama.init()
-    env_bckp = os.environ.copy()
-    os.environ['PATH'] = mainCfg.co_env.str_cmake + ";" + os.environ['PATH']
-    os.environ['PATH'] = mainCfg.co_env.str_mingw + ";" + os.environ['PATH']
-    os.environ['PATH'] = mainCfg.co_env.str_cppcheck + ";" + os.environ['PATH']
+    backUpEnvVariable()
+    setEnvVariable(mCfg.co_env)
 
     kpt = KeyPressThread.KeyboardThread()
 
@@ -222,7 +235,7 @@ def tests_minimized(lstPackage, mainCfg):
         time.sleep(0.5)
 
     # revert environment varaiables
-    os.environ = env_bckp
+    resetEnvVariable()
 
     print("Press any key to quit.\n")
     readchar.readkey()
@@ -233,10 +246,8 @@ def tests(lstPackage, mainCfg):
     # print("Test all pkgs")
     # print(lstPackage)
     # debug(lstPackage, mainCfg)
-    env_bckp = os.environ.copy()
-    os.environ['PATH'] = mainCfg.co_env.str_cmake + ";" + os.environ['PATH']
-    os.environ['PATH'] = mainCfg.co_env.str_mingw + ";" + os.environ['PATH']
-    os.environ['PATH'] = mainCfg.co_env.str_cppcheck + ";" + os.environ['PATH']
+    backUpEnvVariable()
+    setEnvVariable(mainCfg.co_env)
 
     kpt = KeyPressThread.KeyboardThread()
 
@@ -305,7 +316,7 @@ def tests(lstPackage, mainCfg):
     print(tabulate(resultTab, headerTab, tablefmt="pretty"))
 
     # revert environment varaiables
-    os.environ = env_bckp
+    resetEnvVariable()
 
     print("Press any key to quit.\n")
     readchar.readkey()
@@ -587,7 +598,8 @@ class CTestPkg():
                     #    "Some lines could be duplicite"
                     #    + " because c++ create multiple implementation of functions")
                 for file in dict_covFile:
-                    lineLst = set(dict_covFile[file])
+                    lineLst = list(set(dict_covFile[file]))
+                    lineLst.sort()
                     # res = []
                     # [res.append(x) for x in lineLst if x not in res]
                     # lenOfLineLst = len(res)
