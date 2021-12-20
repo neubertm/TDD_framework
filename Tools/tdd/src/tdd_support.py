@@ -33,9 +33,20 @@ import threading
 import readchar
 import os
 import filecmp
+import subprocess
 from pathlib import Path
 from TDDConfig import CTestConfig
 from TDDConfig import CMainConfig
+
+
+def getRightSourceSuffixFromHeader(hSuf):
+    suffixDict = {'h': 'c', 'H': 'C', 'hpp': 'cpp', 'HPP': 'CPP'}
+    stripSuff = hSuf.replace('.','')
+    assert suffixDict.has_key(stripSuff), 'Unexisting header suffix(%s)!' % (stripSuff)
+    return suffixDict[stripSuff]
+
+def getCppSuffix(hSuf):
+    return 'cpp'
 
 
 def del_folder(path: Path):
@@ -184,6 +195,7 @@ def processAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, t
             key.replace("SRCFLDR", mainCfg.co_pkg.str_srcfldr)
             .replace("SRC_TEMP", str_TstSrcPth)
             .replace("TPKG_FOLDER", strPathToTmpTestSrcFldr)
+            .replace("TESTPATH", mainCfg.co_pkg.str_testpath)
         )
         valStr = (
             other[key]
@@ -203,6 +215,23 @@ def processAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, t
                 pathDst = pathDst / pathSrc.name
         srcLst.append(str(pathSrc))
         dstLst.append(str(pathDst))
+
+    # TODO add section with creating Automocks and create new lists for that
+    subsDict = {"SRCFLDR": mainCfg.co_pkg.str_srcfldr,
+                "SRC_TEMP": str_TstSrcPth,
+                "TPKG_FOLDER": strPathToTmpTestSrcFldr,
+                "TESTPATH": mainCfg.co_pkg.str_testpath}
+    dict = testCfg.AUTOMOCK_dict
+    mockSrcLst, mockDstLst, automDic = processMockDictionary(dict, subsDict, getRightSourceSuffixFromHeader)
+    srcLst = srcLst + mockSrcLst
+    dstLst = dstLst + mockDstLst
+
+    dictCPP = testCfg.AUTOMOCKCPP_dict
+    mockSrcCPPLst, mockDstCPPLst, automCppDic = processMockDictionary(dictCPP, subsDict, getCppSuffix)
+    srcLst = srcLst + mockSrcCPPLst
+    dstLst = dstLst + mockDstCPPLst
+
+    MockIncLst = [patchStrByDict(incItem,subsDict) for incItem in testCfg.AUTOMOCKFLDRINC_lst]
 
     for srcFile in srcLst:
         pSrcFile = Path(srcFile)
@@ -224,6 +253,23 @@ def processAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, t
         pTmpTestSrcFullPath.mkdir()
 
     # do copy operation for all files
+    copeListOfFiles(srcLst, dstLst)
+
+    createAutomocks(automDic,MockIncLst)
+    createAutomocks(automCppDic,MockIncLst,forcedCpp=True)
+
+    chckLst = srcLst.copy()
+    chckLst.append(str(pPathToTmpTestSrcFldr
+                   / mainCfg.co_pkg.str_testcfgfilename))
+
+
+    # define mock src file (HEADER)
+    # define mock dst file (C ot C++ SOURCE)
+    # automock dictionary
+    # run creating automock file based on automockDict
+    return srcLst, dstLst, chckLst
+
+def copeListOfFiles(srcLst, dstLst):
     assert len(srcLst) == len(dstLst), (
         "Source list and Destination list" "must have the same lenght!"
     )
@@ -236,13 +282,74 @@ def processAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, t
             not filecmp.cmp(srcLst[iter], dstLst[iter])
         ):
             Path(dstLst[iter]).write_text(Path(srcLst[iter]).read_text())
+    pass
 
-    chckLst = srcLst.copy()
-    chckLst.append(str(pPathToTmpTestSrcFldr
-                   / mainCfg.co_pkg.str_testcfgfilename))
-    # TODO add section with creating Automocks and create new lists for that
-    return srcLst, dstLst, chckLst
+def processMockDictionary(dict, subsDict, fnc_suffix):
+    srcLst = []
+    dstLst = []
+    mockDict = {}
+    for key in dict:
+        procKey = patchStrByDict(key, subsDict)
+        procVal = patchStrByDict(dict[key], subsDict)
+        pathSrc = Path(procKey)
+        str_SrcFileName = pathSrc.name
+        str_SrcSuffix = pathSrc.suffix
+        str_SrcStripName = str_SrcFileName.replace(pathSrc.suffix, '')
+        pathDst = Path(procVal)
+        dstFileName = ''
+        if '' != pathDst.suffix:
+            #extract file name
+            dstFileName = pathDst.name
+            #remove filename from path
+            pathDst = pathDst.parents[0]
 
+        pathHeaderDst = pathDst / str_SrcFileName
+        pathMockDst = pathDst / (str_SrcStripName + '_MOCK.' + fnc_suffix(str_SrcSuffix))
+
+        srcLst.append(procKey)
+        dstLst.append(str(pathHeaderDst))
+        mockDict[procKey] = str(pathMockDst)
+
+    return srcLst, dstLst, mockDict
+
+def createAutomocks(mockDict,incLst,strCppStd = 'c++11', strCStd = 'c99', forcedCpp = False):
+    for key in mockDict:
+        callAutomockTool(key, mockDict[key], incLst, strCppStd, strCStd, forcedCpp)
+
+def callAutomockTool(headerName, mockName, incList, strCppStd, strCStd, forcedCpp):
+    str_PathCppUMockGen = Path('Tools') / 'programs' / 'CppUMockGen-0.4-win64' / 'bin' / 'CppUMockGen.exe'
+    op_lst = [str(str_PathCppUMockGen)]
+
+    # i is input
+    op_lst.append('--input')
+    op_lst.append(headerName)
+
+    # m is mocked file
+    op_lst.append('--mock-output')
+    op_lst.append(mockName)
+
+    # forced cpp
+    if True == forcedCpp:
+        op_lst.append('--cpp')
+
+    op_lst.append('--std')
+    op_lst.append(strCppStd)
+
+    op_lst.append('--std')
+    op_lst.append(strCStd)
+
+    for incPath in incList:
+        op_lst.append('--include-path')
+        op_lst.append(incPath)
+
+    subprocess.call(op_lst, shell=True)
+
+def patchStrByDict(strPath, subsDict):
+    strArg = strPath
+    for key in subsDict:
+        strArg = strArg.replace(key,subsDict[key])
+
+    return strArg
 
 def interpretCPPUTESToutput(resultFile: str):
     with open(resultFile, "r") as File:
