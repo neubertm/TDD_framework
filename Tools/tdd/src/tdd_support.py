@@ -331,17 +331,20 @@ def callAutomockTool(headerName, mockName, incList, strCppStd, strCStd, forcedCp
     # forced cpp
     if True == forcedCpp:
         op_lst.append('--cpp')
+    else:
+        op_lst.append('--std')
+        op_lst.append(strCStd)
 
     op_lst.append('--std')
     op_lst.append(strCppStd)
 
-    op_lst.append('--std')
-    op_lst.append(strCStd)
+
 
     for incPath in incList:
         op_lst.append('--include-path')
         op_lst.append(incPath)
 
+    # print(op_lst)
     subprocess.call(op_lst, shell=True)
 
 def patchStrByDict(strPath, subsDict):

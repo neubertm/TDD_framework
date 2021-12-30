@@ -284,7 +284,7 @@ class CCMakeGenerator():
             if not (suffixSrc in self.mainCfg.hsuffix):
                 continue
 
-            fileNameDst = fileNameSrc.replace(pathFileSrc.suffix,'') + '.' + getSuffixNameFnc(suffixSrc)
+            fileNameDst = fileNameSrc.replace(pathFileSrc.suffix,'') + '_MOCK.' + getSuffixNameFnc(suffixSrc)
             pathFileDst = Path(Dict[key])
             pathFileDstParts = [part for part in pathFileDst.parts if part]
 

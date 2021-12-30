@@ -3,8 +3,8 @@
 
 // constructor
 CHuamaker::CHuamaker(void)
+  : po_mPrinter{NULL}
 {
-	po_mPrinter = NULL;
 }
 
 // destructor
@@ -24,7 +24,7 @@ void CHuamaker::makeHua(unsigned int uint_pCount)
 			// call printer
 			po_mPrinter->out("hua ");
 		}
-		
+
 		// call printer
 		po_mPrinter->out("!!!");
 	}
@@ -39,7 +39,7 @@ void CHuamaker::makeHua(unsigned int uint_pCount)
 void CHuamaker::setPrinter(CPrinter *po_pPrinter)
 {
 	//int i = 0;
-	
+
 	po_mPrinter = po_pPrinter;
 	//i++;
 }

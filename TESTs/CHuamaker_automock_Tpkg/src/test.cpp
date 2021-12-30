@@ -15,16 +15,18 @@ TEST_GROUP(CHuamaker)
 
   void setup()
   {
+    mock().checkExpectations();
     cHuamaker = new CHuamaker();
-	Printer =  new CPrinter();
-	
+    Printer =  new CPrinter();
+
   }
   void teardown()
   {
     delete cHuamaker;
-	delete Printer;
-	
-	mock().clear();
+    delete Printer;
+
+    mock().checkExpectations();
+    mock().clear();
   }
 };
 
@@ -34,29 +36,44 @@ TEST(CHuamaker, Create)
   FAIL("Nemohu testovat hodnotu je private.");
 }
 */
-TEST(CHuamaker, PrinterNotSet)
-{
-  cHuamaker->makeHua(4);
 
-  STRCMP_EQUAL("\0",Printer->getOutput());
-}
-
-TEST(CHuamaker, Write4Time)
-{
-
-  cHuamaker->setPrinter( Printer );
-  
-  cHuamaker->makeHua(4);
-  
-  STRCMP_EQUAL("hua hua hua hua !!!",Printer->getOutput());
-}
+//TEST(CHuamaker, PrinterNotSet)
+//{
+//  cHuamaker->makeHua(4);
+//}
 
 TEST(CHuamaker, Write0Time)
 {
+
   cHuamaker->setPrinter( Printer );
-  
+
+  mock().expectOneCall("CPrinter::out").onObject(Printer).withStringParameter("cs_pText", "!!!");
   cHuamaker->makeHua(0);
-  
-  STRCMP_EQUAL("!!!",Printer->getOutput());
+
+  //mock().expectNCalls(4,"CPrinter::out").onObject(Printer).withStringParameter("cs_pText", "hua ");
+
+  mock().checkExpectations();
 }
 
+TEST(CHuamaker, WriteNTime)
+{
+  int N = 4;
+  cHuamaker->setPrinter( Printer );
+
+  mock().expectNCalls(N,"CPrinter::out").onObject(Printer).withStringParameter("cs_pText", "hua ");
+  mock().expectOneCall("CPrinter::out").onObject(Printer).withStringParameter("cs_pText", "!!!");
+  cHuamaker->makeHua(N);
+
+
+
+  mock().checkExpectations();
+}
+
+//TEST(CHuamaker, Write0Time)
+//{
+//  cHuamaker->setPrinter( Printer );
+//
+//  cHuamaker->makeHua(0);
+//
+//  STRCMP_EQUAL("!!!",Printer->getOutput());
+//}

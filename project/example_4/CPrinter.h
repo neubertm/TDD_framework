@@ -5,12 +5,11 @@ class CPrinter {
  public:
 
 	// constructor
-	CPrinter();
+	CPrinter()=default;
 
 	// destruktor
-	~CPrinter();
+	~CPrinter()=default;
 
 	// print
 	void out(const char *cs_pText);
 };
-
