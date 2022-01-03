@@ -1,5 +1,7 @@
 #pragma once
 
+//void foo(void);
+
 class CPrinter {
 
  public:

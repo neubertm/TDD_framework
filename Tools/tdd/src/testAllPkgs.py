@@ -343,6 +343,7 @@ class CTestPkg():
     LS_srcL: [str]
     LS_dstL: [str]
     dic_chckFiles: {}
+    IncMockLst: []
 
     def __init__(self, name, mainCfg, kpt):
         # super(CTestPkg, self).__init__(name=name)
@@ -369,6 +370,13 @@ class CTestPkg():
         self.LS_dstL = []
         self.dic_chckFiles = {}
         self.thread_keyPress = kpt
+        self.IncMockLst = []
+        self.DicMock = {}
+        self.DickCppMock = {}
+        self.dic_chckMockFiles = {}
+        self.dic_chckCppMockFiles = {}
+
+
         # self.start()
 
     def __getBuildFolderName__(self):
@@ -407,12 +415,15 @@ class CTestPkg():
         self.__writeStep__("Copy files")
 
         # copy all files and create lists
-        self.LS_srcL, self.LS_dstL, self.LS_chckLFile = tdd_support.processAllFilesAndReturnListOfThem(
+        self.LS_srcL, self.LS_dstL, self.LS_chckLFile, self.DicMock, self.DicCppMock, self.IncMockLst = tdd_support.processAllFilesAndReturnListOfThem(
             self.name, self.mCfg, self.tCfg, self.str_testType)
 
         # create dictionary key is chckLFile, value status_time
         self.dic_chckFiles = {
             chckF: os.stat(chckF).st_mtime for chckF in self.LS_chckLFile}
+
+        self.dic_chckMockFiles = {chckF: os.stat(chckF).st_mtime for chckF in self.DicMock}
+        self.dic_chckCppMockFiles = {chckF: os.stat(chckF).st_mtime for chckF in self.DicCppMock}
 
         # self.str_srcFldr
         self.str_srcFldr = tdd_support.getSrcTestTempFolderName(
@@ -800,7 +811,35 @@ class CTestPkg():
         pass
 
     def __updateAutomocks__(self):
-        pass
+        # self.dic_chckMockFiles (check and process)
+        self.dic_chckMockFiles = self.checkAndUpdateCheckMockDictionary(
+                                            self.dic_chckMockFiles,
+                                            self.DicMock,
+                                            self.IncMockLst,
+                                            False)
+
+        # self.dic_chckCppMockFiles (check and process)
+        self.dic_chckCppMockFiles = self.checkAndUpdateCheckMockDictionary(
+                                               self.dic_chckCppMockFiles,
+                                               self.DicCppMock,
+                                               self.IncMockLst,
+                                               True)
+
+
+    def checkAndUpdateCheckMockDictionary(self, dic_chck, dic_mock, lst_mockInc, fCpp):
+        hMockLst = list(dic_chck.keys())
+        hMockLst.sort()
+        locdic_chckFiles = {
+            chckF: os.stat(chckF).st_mtime for chckF in hMockLst}
+        for key in dic_chck:
+            if locdic_chckFiles.get(key) != dic_chck.get(key):
+                #NOTE: header file copy is not neccesary it happend in loop above
+                #create new mock
+                print({key:dic_mock.get(key)})
+                tdd_support.createAutomocks({key:dic_mock.get(key)},
+                                            lst_mockInc,
+                                            forcedCpp=fCpp)
+        return locdic_chckFiles
 
     def __runTest__(self):
         b_buildStatus = False

@@ -42,7 +42,7 @@ from TDDConfig import CMainConfig
 def getRightSourceSuffixFromHeader(hSuf):
     suffixDict = {'h': 'c', 'H': 'C', 'hpp': 'cpp', 'HPP': 'CPP'}
     stripSuff = hSuf.replace('.','')
-    assert suffixDict.has_key(stripSuff), 'Unexisting header suffix(%s)!' % (stripSuff)
+    assert stripSuff in suffixDict, 'Unexisting header suffix(%s)!' % (stripSuff)
     return suffixDict[stripSuff]
 
 def getCppSuffix(hSuf):
@@ -267,7 +267,7 @@ def processAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, t
     # define mock dst file (C ot C++ SOURCE)
     # automock dictionary
     # run creating automock file based on automockDict
-    return srcLst, dstLst, chckLst
+    return srcLst, dstLst, chckLst, automDic, automCppDic, MockIncLst
 
 def copeListOfFiles(srcLst, dstLst):
     assert len(srcLst) == len(dstLst), (
@@ -282,12 +282,20 @@ def copeListOfFiles(srcLst, dstLst):
             not filecmp.cmp(srcLst[iter], dstLst[iter])
         ):
             Path(dstLst[iter]).write_text(Path(srcLst[iter]).read_text())
-    pass
+
 
 def processMockDictionary(dict, subsDict, fnc_suffix):
+    '''
+        This function accept input dictionary where key is header file and
+        create/get position of header file location and create mock for header.
+    '''
+    # 'source location' of header file
     srcLst = []
+    # 'destination location' of header file
     dstLst = []
+    # dictionary contains as key source location and mocked file
     mockDict = {}
+    #for each header file do
     for key in dict:
         procKey = patchStrByDict(key, subsDict)
         procVal = patchStrByDict(dict[key], subsDict)
@@ -313,11 +321,18 @@ def processMockDictionary(dict, subsDict, fnc_suffix):
     return srcLst, dstLst, mockDict
 
 def createAutomocks(mockDict,incLst,strCppStd = 'c++11', strCStd = 'c99', forcedCpp = False):
+    '''
+    This function create mock file for whole mock dictionary,
+    it has default parameters and call creating function for each specific item.
+    '''
     for key in mockDict:
         callAutomockTool(key, mockDict[key], incLst, strCppStd, strCStd, forcedCpp)
 
+def getPathAutomockTool():
+    return Path('Tools') / 'programs' / 'CppUMockGen-0.4-win64' / 'bin' / 'CppUMockGen'
+
 def callAutomockTool(headerName, mockName, incList, strCppStd, strCStd, forcedCpp):
-    str_PathCppUMockGen = Path('Tools') / 'programs' / 'CppUMockGen-0.4-win64' / 'bin' / 'CppUMockGen.exe'
+    str_PathCppUMockGen = getPathAutomockTool()
     op_lst = [str(str_PathCppUMockGen)]
 
     # i is input
