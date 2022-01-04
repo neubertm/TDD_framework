@@ -1,39 +1,41 @@
+extern "C"
+{
 #include "Huamaker.h"
-
+}
 // Mocks
 #include "Printer.h"
 
 //CppUTest includes should be after your and system includes
-#include "CppUTest/TestHarness_c.h"
-#include "CppUTestExt/MockSupport_c.h"
+#include "CppUTest/TestHarness.h"
+#include "CppUTestExt/MockSupport.h"
 
-TEST_GROUP(CHuamaker)
+TEST_GROUP(Huamaker)
 {
   void setup()
   {
-    mock_c().checkExpectations();
+    mock().checkExpectations();
   }
   void teardown()
   {
-    mock_c().checkExpectations();
-    mock_c().clear();
+    mock().checkExpectations();
+    mock().clear();
   }
 };
 
-TEST(CHuamaker, Write0Time)
+TEST(Huamaker, Write0Time)
 {
-  mock_c().expectOneCall("print_out").withStringParameter("cs_pText", "!!!");
+  mock().expectOneCall("print_out").withStringParameter("cs_pText", "!!!");
   makeHua(0);
 
-  mock_c().checkExpectations();
+  mock().checkExpectations();
 }
 
-TEST(CHuamaker, WriteNTime)
+TEST(Huamaker, WriteNTime)
 {
   int N = 4;
-  mock_c().expectNCalls(N,"print_out").withStringParameter("cs_pText", "hua ");
-  mock_c().expectOneCall("print_out").withStringParameter("cs_pText", "!!!");
+  mock().expectNCalls(N,"print_out").withStringParameter("cs_pText", "hua ");
+  mock().expectOneCall("print_out").withStringParameter("cs_pText", "!!!");
   makeHua(N);
 
-  mock_c().checkExpectations();
+  mock().checkExpectations();
 }
