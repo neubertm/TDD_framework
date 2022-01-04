@@ -55,12 +55,10 @@ class TestCMakeSupport(unittest.TestCase):
         cmakeGen = CS.CCMakeGenerator('testFile','testType')
         cmakeGen.AUTOMOCK_dict = {'pooo/Foo.h': 'SRC_TEMP'}
 
-        mock_getSuffix = mock.Mock(return_value='c')
+        cmakeGen.processAutomockDictionary(cmakeGen.AUTOMOCK_dict,'TMPSRC')
 
-        cmakeGen.processAutomockDictionary(cmakeGen.AUTOMOCK_dict,'TMPSRC',mock_getSuffix)
+        mock_wf.assert_called_with('\t${CMAKE_SOURCE_DIR}/TMPSRC/Foo_MOCK.cpp\n')
 
-        mock_wf.assert_called_with('\t${CMAKE_SOURCE_DIR}/TMPSRC/Foo.c\n')
-        mock_getSuffix.assert_called_with('h')
         pass
 
     @patch('cmakeSupport.CCMakeGenerator.writeToFile')
@@ -68,12 +66,9 @@ class TestCMakeSupport(unittest.TestCase):
         cmakeGen = CS.CCMakeGenerator('testFile','testType')
         cmakeGen.AUTOMOCK_dict = {'pooo/Foo.h': 'SRC_TEMP', 'pooo/Foo.c': 'SRC_TEMP'}
 
-        mock_getSuffix = mock.Mock(return_value='c')
+        cmakeGen.processAutomockDictionary(cmakeGen.AUTOMOCK_dict,'TMPSRC')
 
-        cmakeGen.processAutomockDictionary(cmakeGen.AUTOMOCK_dict,'TMPSRC',mock_getSuffix)
-
-        mock_wf.assert_called_with('\t${CMAKE_SOURCE_DIR}/TMPSRC/Foo.c\n')
-        mock_getSuffix.assert_called_with('h')
+        mock_wf.assert_called_with('\t${CMAKE_SOURCE_DIR}/TMPSRC/Foo_MOCK.cpp\n')
         pass
 
     @patch('cmakeSupport.CCMakeGenerator.writeToFile')
@@ -81,32 +76,26 @@ class TestCMakeSupport(unittest.TestCase):
         cmakeGen = CS.CCMakeGenerator('testFile','testType')
         cmakeGen.AUTOMOCK_dict = {'pooo/Foo.h': 'SRC_TEMP'}
 
-        mock_getSuffix = mock.Mock(return_value='cpp')
+        cmakeGen.processAutomockDictionary(cmakeGen.AUTOMOCK_dict,'TMPSRC')
 
-        cmakeGen.processAutomockDictionary(cmakeGen.AUTOMOCK_dict,'TMPSRC',mock_getSuffix)
-
-        mock_wf.assert_called_with('\t${CMAKE_SOURCE_DIR}/TMPSRC/Foo.cpp\n')
-        mock_getSuffix.assert_called_with('h')
-        pass
+        mock_wf.assert_called_with('\t${CMAKE_SOURCE_DIR}/TMPSRC/Foo_MOCK.cpp\n')
 
 
     @patch('cmakeSupport.CCMakeGenerator.processAutomockDictionary')
-    @patch('cmakeSupport.getSuffixName')
-    def test_writeToCMakefileAddExecutableAutomockFiles(self, mock_gsn, mock_pad):
+    def test_writeToCMakefileAddExecutableAutomockFiles(self,  mock_pad):
         cmakeGen = CS.CCMakeGenerator('testFile','testType')
         cmakeGen.testCfg.AUTOMOCK_dict = {'pooo/Foo.h': 'SRC_TEMP'}
 
         cmakeGen.writeToCMakefileAddExecutableAutomockFiles('TMPSRC')
-        mock_pad.assert_called_with(cmakeGen.testCfg.AUTOMOCK_dict,'TMPSRC', mock_gsn)
+        mock_pad.assert_called_with(cmakeGen.testCfg.AUTOMOCK_dict,'TMPSRC')
         pass
 
 
     @patch('cmakeSupport.CCMakeGenerator.processAutomockDictionary')
-    @patch('cmakeSupport.getSuffixNameAlwaysCpp')
-    def test_writeToCMakefileAddExecutableAutomockCppFiles(self, mock_gsn, mock_pad):
+    def test_writeToCMakefileAddExecutableAutomockCppFiles(self, mock_pad):
         cmakeGen = CS.CCMakeGenerator('testFile','testType')
         cmakeGen.testCfg.AUTOMOCKCPP_dict = {'pooo/Foo.h': 'SRC_TEMP'}
 
         cmakeGen.writeToCMakefileAddExecutableAutomockCppFiles('TMPSRC')
-        mock_pad.assert_called_with(cmakeGen.testCfg.AUTOMOCKCPP_dict,'TMPSRC', mock_gsn)
+        mock_pad.assert_called_with(cmakeGen.testCfg.AUTOMOCKCPP_dict,'TMPSRC')
         pass

@@ -36,6 +36,10 @@ from TDDConfig import CMainConfig
 import os
 from pathlib import Path
 
+
+def getSuffixNameAlwaysCpp(str_header):
+    return 'cpp'
+
 def assertUnexpectedBehavior(text):
     assertWithText(False, text)
 
@@ -265,16 +269,16 @@ class CCMakeGenerator():
 
     def writeToCMakefileAddExecutableAutomockFiles(self, tmpTestSrcFldr):
         Dict = self.testCfg.AUTOMOCK_dict
-        self.processAutomockDictionary(Dict, tmpTestSrcFldr, getSuffixName)
+        # self.processAutomockDictionary(Dict, tmpTestSrcFldr, getSuffixName)
+        self.processAutomockDictionary(Dict, tmpTestSrcFldr)
 
 
     def writeToCMakefileAddExecutableAutomockCppFiles(self, tmpTestSrcFldr):
         Dict = self.testCfg.AUTOMOCKCPP_dict
-        self.processAutomockDictionary(Dict, tmpTestSrcFldr, getSuffixNameAlwaysCpp)
+        self.processAutomockDictionary(Dict, tmpTestSrcFldr)
 
 
-
-    def processAutomockDictionary(self, Dict, tmpTestSrcFldr, getSuffixNameFnc):
+    def processAutomockDictionary(self, Dict, tmpTestSrcFldr, getSuffixNameFnc = getSuffixNameAlwaysCpp):
         for key in Dict:
             pathFileSrc = Path(key)
             fileNameSrc = pathFileSrc.name
@@ -356,8 +360,6 @@ class CCMakeGenerator():
         strVl = '%s' % str(pIncludeDir.as_posix())
         self.writeToFile("\t" + strVl + "\n")
 
-def getSuffixNameAlwaysCpp(str_header):
-    return 'cpp'
 
 def getSuffixName(str_header):
     if str_header in ['h','H']:
