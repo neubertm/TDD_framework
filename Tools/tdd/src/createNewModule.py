@@ -113,21 +113,28 @@ def processFile(str_src, str_dest, dic):
 
     pass
 
-def questionReturningPositiveInteger(questionText):
+def questionReturningPositiveInteger(questionText, default_uint=-1, forced_default=False):
+    if forced_default:
+        printout(questionText + ' Using forced default value[%i]' % (default_uint))
+        return default_uint
+
     b_confirm = False
 
     int_retVal = -1
 
     while not b_confirm:
-        str_retVal = get_input(questionText + ' [Fill positive number]:')
-        if str_retVal.isdecimal():
+        str_retVal = get_input(questionText + ' [Fill positive number(default is %i)]:' % (default_uint))
+        if "" == str_retVal:
+            int_retVal = default_uint
+        elif str_retVal.isdecimal():
             int_retVal = int(str_retVal)
         else:
             printout('Invalid input try it again.')
             continue
 
         if 0 < int_retVal :
-            b_confirm = questionYesNo('Confirm this value: %i' % (int_retVal))
+            # b_confirm = questionYesNo('Confirm this value: %i' % (int_retVal))
+            b_confirm = True
 
     return int_retVal
 
@@ -135,23 +142,36 @@ def questionReturnString(questionText):
     '''
     Function ask user to fill string value. User have to confirm his choice.
     '''
-    b_confirm = False
-    str_retVal = ''
+    #b_confirm = False
+    #str_retVal = ''
 
-    while not b_confirm:
-        str_retVal = get_input(questionText)
-        b_confirm = questionYesNo('Confirm this value: %s' % (str_retVal))
+    #while not b_confirm:
+    #    str_retVal = get_input(questionText)
+    #    b_confirm = questionYesNo('Confirm this value: %s' % (str_retVal))
 
-    return str_retVal
+    #return str_retVal
+    return get_input(questionText)
 
-def questionYesNo(QuestionOfText):
+def questionYesNo(QuestionOfText, default_val=True, forced_default = False):
+    if default_val:
+        str_def = 'yes'
+    else:
+        str_def = 'no'
+
+    if forced_default:
+        printout(QuestionOfText + ' Used default default value[%s]' % (str_def))
+        return default_val
+
     bRetVal = False
     while(1):
-        answer = get_input(QuestionOfText + " [yes(y)|no(n)]:")
+        answer = get_input(QuestionOfText + ' [yes(y)|no(n)] (default %s):' % (str_def))
         if answer == "yes" or answer == 'y':
             bRetVal = True
             break
         elif answer == "no" or answer == 'n':
+            break
+        elif answer == '':
+            bRetVal = default_val
             break
         else:
             printout("Incorrect input value.")
@@ -331,7 +351,7 @@ class CreateNewModule():
         str_fullHeaderName = '.'.join([self.str_COMPONENT_NAME,str_headersuff])
 
         printout("New SUT file are: \n\t%s\n\t%s" % (str_fullHeaderName, str_fullSrcName))
-        if not questionYesNo('Are names correct?'):
+        if not questionYesNo('Are names correct?', forced_default=True):
             str_fullHeaderName = questionReturnString('Define full name for header (name.suff).')
             str_fullSrcName = questionReturnString('Define full name for source (name.suff).')
 
@@ -370,7 +390,7 @@ class CreateNewModule():
         '''
         User can define coverage configuration.
         '''
-        self.testConfig.co_coverage.isTurnedOn = questionYesNo('Do you want to enable coverage:')
+        self.testConfig.co_coverage.isTurnedOn = questionYesNo('Do you want to enable coverage:', forced_default=True)
         self.testConfig.co_coverage.uncoveredLineListLength = 0
         pass
 
@@ -379,10 +399,10 @@ class CreateNewModule():
         User can define static analysis configuration.
         '''
 
-        self.testConfig.co_staticAnalysis.isTurnedOn  = questionYesNo('Do you want to enable static analysis:')
+        self.testConfig.co_staticAnalysis.isTurnedOn  = questionYesNo('Do you want to enable static analysis:', forced_default=True)
         # configuration make sence only when static analysis is turned on. we can let it in default state.
         if self.testConfig.co_staticAnalysis.isTurnedOn:
-            self.testConfig.co_staticAnalysis.isLanguageDefinedBySuffix = questionYesNo('Should be language recognized from suffix:')
+            self.testConfig.co_staticAnalysis.isLanguageDefinedBySuffix = questionYesNo('Should be language recognized from suffix:', default_val=False, forced_default=True)
             self.testConfig.co_staticAnalysis.str_c_version = questionWithList('Choose version of c.',['c89', 'c99', 'c11'],'c99')
             self.testConfig.co_staticAnalysis.str_cpp_version = questionWithList('Choose version of c++.',['c++03', 'c++11', 'c++14', 'c++17', 'c++20'],'c++11')
 
@@ -403,15 +423,15 @@ class CreateNewModule():
         '''
         User can define complexity static configuration.
         '''
-        self.testConfig.co_codeStatistics.isTurnedOn = questionYesNo('Do you want to enable code quality parameters:')
+        self.testConfig.co_codeStatistics.isTurnedOn = questionYesNo('Do you want to enable code quality parameters:', forced_default=True)
 
         if self.testConfig.co_codeStatistics.isTurnedOn:
-            self.testConfig.co_codeStatistics.isUsedTestSpecificOnly = questionYesNo('Do you want to use only test parameters? Global params will not be taken in account.')
+            self.testConfig.co_codeStatistics.isUsedTestSpecificOnly = questionYesNo('Do you want to use only test parameters? Global params will not be taken in account.', forced_default=True)
             if not self.testConfig.co_codeStatistics.isUsedTestSpecificOnly:
-                self.testConfig.co_codeStatistics.isUsedStricter = questionYesNo('Do you want to use harder criteries(test vs. global):')
-            self.testConfig.co_codeStatistics.int_mccabeComplex = questionReturningPositiveInteger('Define McCabe complexity')
-            self.testConfig.co_codeStatistics.int_fncLength = questionReturningPositiveInteger('Define function length')
-            self.testConfig.co_codeStatistics.int_paramCnt  = questionReturningPositiveInteger('Define maximum function params')
+                self.testConfig.co_codeStatistics.isUsedStricter = questionYesNo('Do you want to use harder criteries(test vs. global):', forced_default=True)
+            self.testConfig.co_codeStatistics.int_mccabeComplex = questionReturningPositiveInteger('Define McCabe complexity',default_uint=8,forced_default=True)
+            self.testConfig.co_codeStatistics.int_fncLength = questionReturningPositiveInteger('Define function length',default_uint=50,forced_default=True)
+            self.testConfig.co_codeStatistics.int_paramCnt  = questionReturningPositiveInteger('Define maximum function params',default_uint=4,forced_default=True)
 
 
     def createHeaderFile(self):
