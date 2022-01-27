@@ -63,6 +63,8 @@ echo Test: testAllPkgs.py
 python -m unittest test\test_testAllPkgs.py
 echo Test: CMakeSupport.py
 python -m unittest test\test_CMakeSupport.py
+echo Test: automock.py
+python -m unittest test\test_automock.py
 
 
 pause
