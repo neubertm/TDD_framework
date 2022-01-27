@@ -1,4 +1,4 @@
-#include "%FILENAME.hpp"
+#include "%HEADER_FILENAME"
 
 //CppUTest includes should be after your and system includes
 #include "CppUTest/TestHarness.h"
