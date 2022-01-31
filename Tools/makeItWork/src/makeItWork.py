@@ -32,6 +32,7 @@
 import os
 import sys
 import subprocess
+from pathlib import Path
 
 toolsFldr = "Tools"
 rootLibsFldr = os.path.join(toolsFldr, "testlibs")
@@ -271,6 +272,7 @@ class SoftwareAndTools:
                 if status:
                     print(self.str_appName, " found in this path: ", path)
                     status, path = self.fnc_checkVer(path)
+                    os.environ['PATH'] = str(Path(path).parent) + ';' + os.environ['PATH']
         return(status, path)
 
     def findInSystem(self):
@@ -677,21 +679,18 @@ def checkCppUMockGen(Path=''):
     #print(op_lst)
     #print('return code =%i' % tCode)
 
-    if (-1073741515 == tCode) or (3221225781 == tCode):
+    if (0 == tCode):
         bRetVal = True
-        print(Fore.YELLOW + '%s exists. But clang is not in path yet.' % (toolName) )
-
-    if (0 < tCode):
         with open(out, 'r') as File:
             Data = File.read()
             Info = Data.split('\n')[0].split(' ')
             if (Info[0] == 'CppUMockGen') and (Info[1] == 'v0.4'):
                 bRetVal = True
-                print(Fore.GREEN + '%s is ok. Version: %s' % (toolName, Info[1]) )
-            else:
-                with open(err, 'r') as ErrFile:
-                    EData = ErrFile.read()
-                    missingSO = 'error while loading shared libraries: libclang.dll: cannot open shared object file'
+                print('%s is ok. Version: %s' % (toolName, Info[1]) )
+
+    if (-1073741515 == tCode) or (3221225781 == tCode):
+        bRetVal = True
+        print(Fore.MAGENTA + '%s exists. But clang is not in path yet.' % (toolName) )
 
     if (bRetVal is True):
         if not Path:
