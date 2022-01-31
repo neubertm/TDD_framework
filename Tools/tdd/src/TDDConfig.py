@@ -100,6 +100,8 @@ class CEnvCfg:
     b_clangCheck: bool
     str_cppcheck: str
     b_cppcheckCheck: bool
+    str_cppumockgen: str
+    b_cppumockgen: bool
 
     def __init__(self):
         self.str_cmake = ""
@@ -107,11 +109,13 @@ class CEnvCfg:
         self.str_msvc = ""
         self.str_clang = ""
         self.str_cppcheck = ""
+        self.str_cppumockgen = ""
         self.b_cmakeCheck = True
         self.b_mingwCheck = True
         self.b_msvcCheck = True
         self.b_clangCheck = True
         self.b_cppcheckCheck = True
+        self.b_cppumockgen = True
 
     def _readMingw_(self, CPS: ConfigParser):
         bRetVal = False
@@ -178,6 +182,21 @@ class CEnvCfg:
         # TODO
         return b_return
 
+    def _readCppUMockGen_(self, CPS: ConfigParser):
+        bRetVal = False
+        if "CPPUMOCKGEN" in CPS.keys():
+            CPS_CPPUMOCKGEN = CPS['CPPUMOCKGEN']
+            if 'ENV_CONFIG_SCRIPT' in CPS_CPPUMOCKGEN:
+                self.str_cppumockgen = CPS_CPPUMOCKGEN['ENV_CONFIG_SCRIPT']
+                bRetVal = True
+            if 'check' in CPS_CPPUMOCKGEN:
+                self.b_cppumockgen = StrToBool(CPS_CPPUMOCKGEN['check'])
+        return bRetVal
+
+    def _checkCppUMockGen_(self):
+        return True
+        pass
+
     def _readCMake_(self, CPS: ConfigParser):
         bRetVal = False
         if "CMAKE" in CPS.keys():
@@ -211,6 +230,10 @@ class CEnvCfg:
         self._readCppcheck_(CPS)
         if self.b_cppcheckCheck:
             assert self._checkCppcheck_(), "Error config for cppcheck failed -> %s" % (self.str_cppcheck)
+
+        self._readCppUMockGen_(CPS)
+        if self.b_cppumockgen:
+            assert self._checkCppUMockGen_(), "Error config for cppumockgen failed -> %s" % (self.str_cppcheck)
 
     def readFromFile(self, str_fileName: str):
         parser = ConfigParser()

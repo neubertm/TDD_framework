@@ -73,6 +73,7 @@ def setEnvVariable(co_env: CEnvCfg):
     os.environ['PATH'] = co_env.str_mingw + ";" + os.environ['PATH']
     os.environ['PATH'] = co_env.str_cppcheck + ";" + os.environ['PATH']
     os.environ['PATH'] = co_env.str_clang + ";" + os.environ['PATH']
+    os.environ['PATH'] = co_env.str_cppumockgen + ";" + os.environ['PATH']
 
 def resetEnvVariable():
     os.environ = env_bckp

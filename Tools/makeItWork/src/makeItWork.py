@@ -31,6 +31,7 @@
 
 import os
 import sys
+import subprocess
 
 toolsFldr = "Tools"
 rootLibsFldr = os.path.join(toolsFldr, "testlibs")
@@ -274,6 +275,7 @@ class SoftwareAndTools:
 
     def findInSystem(self):
         bRetVal, file_lst = findApp(self.str_appName)
+        #print("Finding: %s(%r)" % (self.str_appName, bRetVal) )
         if bRetVal:
             self.str_pathInSystem = file_lst[0]
 
@@ -639,6 +641,67 @@ def checkCppcheck(Path=""):
 
     return(bRetVal, retPath)
 
+def checkCppUMockGen(Path=''):
+    bRetVal = False
+    #print('checking CppUMockGen')
+    toolName = "CppUMockGen"
+    strVersion = ""
+    argVersion = "--version"
+    bRetVal = False
+    retPath = ""
+    out = os.path.join(tmp_folder, toolName + ".out")
+    err = os.path.join(tmp_folder, toolName + ".err")
+
+    op_lst = []
+    if not Path:
+        op_tool = toolName
+    else:
+        op_tool = Path
+    op_lst.append(op_tool)
+
+    op_tool += argVersion
+    op_lst.append(argVersion)
+
+    op_tool += "  > " + out
+    op_lst.append(">")
+    op_lst.append(out)
+
+
+    op_tool += " 2> " + err
+    op_lst.append("2>")
+    op_lst.append(err)
+
+    # print(op_tool)
+    # os.system(op_lst)
+    tCode = subprocess.call(op_lst,shell=True)
+    #print(op_lst)
+    #print('return code =%i' % tCode)
+
+    if (-1073741515 == tCode) or (3221225781 == tCode):
+        bRetVal = True
+        print(Fore.YELLOW + '%s exists. But clang is not in path yet.' % (toolName) )
+
+    if (0 < tCode):
+        with open(out, 'r') as File:
+            Data = File.read()
+            Info = Data.split('\n')[0].split(' ')
+            if (Info[0] == 'CppUMockGen') and (Info[1] == 'v0.4'):
+                bRetVal = True
+                print(Fore.GREEN + '%s is ok. Version: %s' % (toolName, Info[1]) )
+            else:
+                with open(err, 'r') as ErrFile:
+                    EData = ErrFile.read()
+                    missingSO = 'error while loading shared libraries: libclang.dll: cannot open shared object file'
+
+    if (bRetVal is True):
+        if not Path:
+            retPath = os.popen(
+                "where " + toolName).readlines()[0].split("\n")[0]
+        else:
+            retPath = Path
+
+
+    return(bRetVal, retPath)
 
 def checkCMake(Path=""):
     toolName = "cmake"
@@ -886,7 +949,8 @@ def createCfgFromTemplate(sfDic):
         "gcc": "MINGW_SYSTEM_PATH",
         "mingw": "MINGW_SYSTEM_PATH",
         "cppcheck": "CPPCHECK_SYSTEM_PATH",
-        "clang": "CLANG_SYSTEM_PATH"
+        "clang": "CLANG_SYSTEM_PATH",
+        "CppUMockGen": "CPPUMOCKGEN_SYSTEM_PATH"
     }
     for key in sfDic:
         print(key, switcher[key], sfDic[key])
@@ -964,6 +1028,11 @@ cppcheckLink = ("https://github.com/danmar/cppcheck/releases/download/"
                 + "2.4.1/cppcheck-2.4.1-x64-Setup.msi")
 ST_cppcheck = SoftwareAndTools("cppcheck", checkCppcheck, cppcheckLink)
 ST_list.append(ST_cppcheck)
+
+cppumockgenLink = ('https://github.com/jgonzalezdr/CppUMockGen/releases/'
+                   + 'download/v0.4/Install.CppUMockGen.0.4.x64.exe')
+ST_cppumockgen = SoftwareAndTools('CppUMockGen', checkCppUMockGen, cppumockgenLink)
+ST_list.append(ST_cppumockgen)
 
 for sw in ST_list:
     sw.checkDownloadInstall()

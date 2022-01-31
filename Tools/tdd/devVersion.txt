@@ -1,5 +1,5 @@
-Time_UTC:  2022-01-27 16:27:57
-Branch:  MNe_creating_new_moduleTest_bugfix
+Time_UTC:  2022-01-31 13:33:28
+Branch:  MNe_CppUMockGen_integration
 Name:  Milan Neubert
 Email:  milan.neubert@siemens.com
-HASH: 7e66603cdcb73c6303b2c8e7104de696311fa71f
+HASH: 0b7d2d07b2bc889ed9e4ed2abc2a87d46979b218

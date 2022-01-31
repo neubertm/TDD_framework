@@ -25,17 +25,18 @@ def createAutomocks(mockDict,incLst,strCppStd = 'c++11', strCStd = 'c99', forced
     for key in mockDict:
         callAutomockTool(key, mockDict[key], incLst, strCppStd, strCStd, forcedCpp)
 
-def getPathAutomockTool():
-    '''
-    Function returning path to CppUMockGen, but in future will not be hardcoded but store as other tool in configuration file
-    '''
-    return Path('Tools') / 'programs' / 'CppUMockGen-0.4-win64' / 'bin' / 'CppUMockGen'
+# def getPathAutomockTool():
+#     '''
+#     Function returning path to CppUMockGen, but in future will not be hardcoded but store as other tool in configuration file
+#     '''
+#     return Path('Tools') / 'programs' / 'CppUMockGen-0.4-win64' / 'bin' / 'CppUMockGen'
 
 def callAutomockTool(headerName, mockName, incList, strCppStd, strCStd, forcedCpp):
     '''
     Function call automock tool for generating basic(not patched mock)
     '''
-    str_PathCppUMockGen = getPathAutomockTool()
+    #str_PathCppUMockGen = getPathAutomockTool()
+    str_PathCppUMockGen = "CppUMockGen"
     op_lst = [str(str_PathCppUMockGen)]
 
     # i is input
