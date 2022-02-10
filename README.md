@@ -42,6 +42,10 @@ https://github.com/Kitware/CMake/releases/download/v3.20.3/cmake-3.20.3-windows-
 Currently framework support only gcc compiler(mingw64). If script doesnt
 recognize g++. It ask you if you want to install it or try to find on disk.
 Please install posix thread support.
+
+Note: source server during installation returning error,
+https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/seh/x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z/download
+
 ### CLang compiler
 Currently use only for formatting, but it contain advance code inspection tool,
 static analysis.
@@ -90,7 +94,7 @@ Is intended to allow this.
 14. Add precise configuration of showed tables. For summary test.
 
 ## Known problems
-1. In summary test cant be terminate test before its finished. 
+1. In summary test cant be terminate test before its finished.
 
 ### Windows issues
 1. Windows(cmd) terminal windows could be sensitive to mouse action. Inserting content cause freezing but confirming(pressing enter) terminate test.

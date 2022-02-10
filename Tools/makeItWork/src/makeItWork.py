@@ -223,6 +223,11 @@ except ImportError:
     installPythonPackage("multimetric")
     import multimetric
 
+try:
+    import libclang
+except ImportError:
+    installPythonPackage('libclang')
+    import libclang
 
 def del_folder(path):
     for sub in path.iterdir():

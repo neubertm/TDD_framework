@@ -420,3 +420,8 @@ class TestAutomock(unittest.TestCase):
         for classStr in o_cppClassInfo.ctorNotDefinedLst:
             print(o_cppClassInfo.body[classStr[0]:classStr[1]])
         #self.assertTrue((0,17) == o_cppClassInfo.ctorNotDefinedLst[0] )
+
+    def test_parseCode_simple(self):
+        am.setPathToCLang('C:\\Program Files\\LLVM\\bin')
+        am.parseCode('')
+        pass

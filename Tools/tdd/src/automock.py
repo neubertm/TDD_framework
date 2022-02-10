@@ -2,6 +2,30 @@ from pathlib import Path
 import subprocess
 import re
 
+import clang.cindex
+
+def setPathToCLang(str_CLangPath):
+    '''
+    Set path to clang lib in libclang(python-module)
+    '''
+    clang.cindex.Config.set_library_path(str_CLangPath)
+
+def getListOfUndefinedCtors(cursor, ctorLst):
+    if ( ( cursor.kind == clang.cindex.CursorKind.CONSTRUCTOR ) and
+         ( not cursor.is_definition() ) and
+         ( None == cursor.get_definition() ) and
+         ( not cursor.is_default_method() ) ):
+         ctorLst.append(cursor)
+
+    for iCursor in cursor.get_children():
+        getListOfUndefinedCtors(iCursor,ctorLst)
+
+def parseCode(str_FileName,args=['-std=c++11']):
+    index = clang.cindex.Index.create()
+    tr_unit = index.parse(str_FileName,args)
+    return tr_unit
+
+
 def getAllClassesInHeader(strHeader):
     '''
     Function returns list of class keywords in source code.
