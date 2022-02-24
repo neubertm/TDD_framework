@@ -464,6 +464,9 @@ class CTestPkg():
 
         op_cmakeLst.append("-DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=ON")
 
+        if True == self.tCfg.co_debugconfig.isDebugConfigOn:
+            op_cmakeLst.append('-DCMAKE_BUILD_TYPE=Debug')
+
         op_cmakeLst.append("-DCMAKELISTS_NAME=" + self.str_cmakeName)
         if self.b_silent:
             op_cmakeLst.append(">")

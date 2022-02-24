@@ -531,12 +531,26 @@ class CCodeStatisticsCfg(CBaseToolCfg, CCodeStatParamMinValue):
                 self.int_paramCnt = int(CPS_SEC['PARAM_NUM'])
 
 
+class CDebugConfig():
+    isDebugConfigOn: bool
+
+    def __init__(self):
+        self.isDebugConfigOn = False
+
+    def _read_(self, CPS: ConfigParser):
+        if "BUILD_CONFIG" in CPS.keys():
+            BUILD_SEC = CPS["BUILD_CONFIG"]
+            if 'DEBUG_MODE' in BUILD_SEC:
+                self.isDebugConfigOn = StrToBool(BUILD_SEC['DEBUG_MODE'])
+
+
 class CTestConfig:
     SUT_dict: {str: str}
     OTHER_dict: {str: str}
     AUTOMOCK_dict: {str: str}
     AUTOMOCKCPP_dict: {str: str}
     AUTOMOCKFLDRINC_lst: [str]
+    co_debugconfig: CDebugConfig
     co_coverage: CCovCfg
     co_staticAnalysis: CStaticAnalysisCfg
     co_guidelineFormat: CFormaterGuidelineCheckerCfg
@@ -550,6 +564,7 @@ class CTestConfig:
         self.AUTOMOCK_dict = {}
         self.AUTOMOCKCPP_dict = {}
         self.AUTOMOCKFLDRINC_lst = []
+        self.co_debugconfig = CDebugConfig()
         self.co_coverage = CCovCfg()
         self.co_staticAnalysis = CStaticAnalysisCfg()
         self.co_guidelineFormat = CFormaterGuidelineCheckerCfg()
@@ -576,6 +591,7 @@ class CTestConfig:
             self.AUTOMOCKFLDRINC_lst = list(dict(CPS['AUTOMOCKFLDRINC']).keys())
         # print(self.SUT_dict)
         # print(self.OTHER_dict)
+        self.co_debugconfig._read_(CPS)
         self.co_coverage._read_(CPS)
         self.co_staticAnalysis._read_(CPS)
         self.co_guidelineFormat._read_(CPS)
