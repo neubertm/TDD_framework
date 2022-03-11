@@ -67,22 +67,23 @@ def getSrcTestTempFolderName(testCfg: CTestConfig, mainCfg: CMainConfig, str_tes
 def interpretGCOV2lists(gcvOutFileName, pathBuildFolder):
     """Funtion interpret gcov files expect string gcov file name."""
     try:
-        with open(gcvOutFileName, "r") as cof:
-            cofLines = cof.readlines()
-            lst_cov = []
-            lst_covFiles = []
-            for line in cofLines:
-                splitedLine = line.split(" ")
+        #with open(gcvOutFileName, "r") as cof:
+        #    cofLines = cof.readlines()
+        cofLines = gcvOutFileName
+        lst_cov = []
+        lst_covFiles = []
+        for line in cofLines:
+            splitedLine = line.split(" ")
 
-                if splitedLine[0] == "Lines":
-                    lst_cov.append(line)
+            if splitedLine[0] == "Lines":
+                lst_cov.append(line)
 
-                if splitedLine[0] == "Creating":
-                    lst_covFiles.append(splitedLine[1][1:-2])
+            if splitedLine[0] == "Creating":
+                lst_covFiles.append(splitedLine[1][1:-2])
     except IOError:
         with open("debug.log", "a") as log:
-            log.write("IOError when trying to read this file: "
-                      + gcvOutFileName + "\n")
+            #log.write("IOError when trying to read this file: "
+            #          + gcvOutFileName + "\n")
             log.write("Current folder is: "
                       + os.getcwd() + "\n")
         return [], {}
@@ -279,12 +280,12 @@ def copeListOfFiles(srcLst, dstLst):
 
 
 
-def interpretCPPUTESToutput(resultFile: str):
-    with open(resultFile, "r") as File:
-        resultData = File.read()
+def interpretCPPUTESToutput(resultStrList: [str]):
+    #with open(resultFile, "r") as File:
+    #    resultData = File.read()
+    #resultSplit = resultData.split("\n")
 
-    resultSplit = resultData.split("\n")
-
+    resultSplit = resultStrList
     statusTest = False
     if len(resultSplit) >= 2:
         if resultSplit[1].split(" ")[0] == "OK":
@@ -292,12 +293,13 @@ def interpretCPPUTESToutput(resultFile: str):
     return statusTest
 
 
-def interpretCPPCHECKerrors(errorFile: str):
-    with open(errorFile, "r") as File:
-        errData = File.read()
-
-    errLines = errData.split("\n")
+def interpretCPPCHECKerrors(errorStrList: [str]):
+    #with open(errorFile, "r") as File:
+    #    errData = File.read()
+    #errLines = errData.split("\n")
     # print(errLines)
+
+    errLines = errorStrList
 
     # remove Unmatched hit
     errLines = [line for line in errLines if "Unmatched" not in line]

@@ -225,7 +225,7 @@ class CCMakeGenerator():
         )
 
         # add target link library
-        self.writeToFile("target_link_libraries(TestApp ${TestLib} ${TestLibExt})\n")
+        self.writeToFile("target_link_libraries(TestApp ${TestLib} ${TestLibExt} pthread)\n")
 
     def writeToCMakefileAddExecutableStart(self):
         self.writeToFile("add_executable(TestApp\n")

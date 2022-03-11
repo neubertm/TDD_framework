@@ -46,7 +46,7 @@ import KeyPressThread
 import keyboard
 # import sys
 import cmakeSupport as CS
-
+import virtualshell as vs
 
 env_bckp = os.environ.copy()
 
@@ -448,32 +448,36 @@ class CTestPkg():
 
     def __cmake__(self):
         self.__writeStep__("CMake")
-        op_cmakeLst = []
-        op_cmakeLst.append("cmake")
+        #op_cmakeLst = []
+        #op_cmakeLst.append("cmake")
         # root folder (position of cmakefile)
-        op_cmakeLst.append("-S")
-        op_cmakeLst.append(self.str_TpkgRoot)
+        #op_cmakeLst.append("-S")
+        #op_cmakeLst.append(self.str_TpkgRoot)
+        #op_cmakeLst.append("-B")
+        #op_cmakeLst.append(str(self.path_buildFldr))
+        #op_cmakeLst.append("-G")
+        #op_cmakeLst.append(CS.getGeneratorName(self.tCfg))
+        #op_cmakeLst.append("-DTDD_FRAMEWORK_ROOT_DIR=%s" % str(Path.cwd()))
+        #op_cmakeLst.append("-DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=ON")
+        #op_cmakeLst.append("-DCMAKELISTS_NAME=" + self.str_cmakeName)
+        #if self.b_silent:
+        #    op_cmakeLst.append(">")
+        #    op_cmakeLst.append(str(self.path_buildFldr / "cmake.out"))
 
-        op_cmakeLst.append("-B")
-        op_cmakeLst.append(str(self.path_buildFldr))
-
-        op_cmakeLst.append("-G")
-        op_cmakeLst.append(CS.getGeneratorName(self.tCfg))
-
-        op_cmakeLst.append("-DTDD_FRAMEWORK_ROOT_DIR=%s" % str(Path.cwd()))
-
-        op_cmakeLst.append("-DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=ON")
-
-        op_cmakeLst.append("-DCMAKELISTS_NAME=" + self.str_cmakeName)
-        if self.b_silent:
-            op_cmakeLst.append(">")
-            op_cmakeLst.append(str(self.path_buildFldr / "cmake.out"))
-
-            op_cmakeLst.append("2>")
-            op_cmakeLst.append(str(self.path_buildFldr / "cmake.err"))
+        #    op_cmakeLst.append("2>")
+        #    op_cmakeLst.append(str(self.path_buildFldr / "cmake.err"))
 
         # print(op_cmakeLst)
-        subprocess.call(op_cmakeLst, shell=True)
+        #subprocess.call(op_cmakeLst, shell=True)
+
+        cmd = vs.prepare("cmake")
+        cmd.param("-S", self.str_TpkgRoot)
+        cmd.param("-B", str(self.path_buildFldr))
+        cmd.param("-G", CS.getGeneratorName(self.tCfg))
+        cmd.option("-DTDD_FRAMEWORK_ROOT_DIR=%s" % str(Path.cwd()))
+        cmd.option("-DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=ON")
+        cmd.option("-DCMAKELISTS_NAME=" + self.str_cmakeName)
+        cmd.quietly(self.b_silent).run()
 
     def __make__(self):
         self.__writeStep__("Makefile")
@@ -487,20 +491,10 @@ class CTestPkg():
                     log.write("BaseException when trying to delete this file: "
                               + testAppPath + "\n")
                 pass
-        op_makeLst = []
 
-        op_makeLst.append(CS.getMaketoolName(self.tCfg))
-
-        op_makeLst.append('-C')
-        op_makeLst.append(str(self.path_buildFldr))
-        if self.b_silent:
-            op_makeLst.append('>')
-            op_makeLst.append(str(self.path_buildFldr / "makefile.out"))
-
-            op_makeLst.append('2>')
-            op_makeLst.append(str(self.path_buildFldr / "makefile.err"))
-
-        subprocess.call(op_makeLst, shell=True)
+        cmd = vs.prepare(CS.getMaketoolName(self.tCfg))
+        cmd.param('-C', str(self.path_buildFldr))
+        cmd.quietly(self.b_silent).run()
 
         if not (self.path_buildFldr / self.str_testBinName).is_file():
             self.__writeStatus__("Terminated")
@@ -513,24 +507,17 @@ class CTestPkg():
         testAppPath = str(self.path_buildFldr / self.str_testBinName)
         outF = str(self.path_buildFldr / "testbin.out")
         errF = str(self.path_buildFldr / "testbin.err")
-
         self.__writeStep__("Test")
 
-        op_testRunLst = []
-
-        op_testRunLst.append(testAppPath)
-        if self.b_silent:
-            op_testRunLst.append(">")
-            op_testRunLst.append(outF)
-
-            op_testRunLst.append("2>")
-            op_testRunLst.append(errF)
-        else:
-            op_testRunLst.append("-v")
-            op_testRunLst.append("-c")
+        cmd = vs.prepare(testAppPath)
+        if not self.b_silent:
+            cmd.option("-v")
+            cmd.option("-c")
             print(10*'-' + '< ' + self.name + ' >' + 10*'-' + '\n')
+        cmd_out = cmd.quietly(self.b_silent).outAsList().run()
 
-        intRetVal = subprocess.call(op_testRunLst, shell=True)
+        intRetVal = cmd_out.returncode
+        outF = cmd_out.stdout
 
         if self.b_silent:
             testResult = 0
@@ -553,23 +540,18 @@ class CTestPkg():
         if self.tCfg.co_coverage.isTurnedOn:
             self.__writeStep__("Coverage")
 
-            cover_out = str(self.path_buildFldr / "coverage.out")
-            cover_err = str(self.path_buildFldr / "coverage.err")
+            cmd_gcov = vs.prepare("gcov")
+            cmd_gcov.option("--object-directory")
 
-            covCmdLst = []
-            covCmdLst.append("gcov")
-            covCmdLst.append("--object-directory")
-            covCmdLst.append(
+            cmd_gcov.option(
                 str(Path("CMakeFiles") / "TestApp.dir" / self.str_srcFldr))
-            for sutCovListItem in sutList:
-                covCmdLst.append(str(Path(self.str_TpkgRoot, sutCovListItem)))
 
-            covCmdLst.append(">")
-            covCmdLst.append("coverage.out")
-            covCmdLst.append("2>")
-            covCmdLst.append("coverage.err")
-            # print(covCmdLst)
-            subprocess.call(covCmdLst, shell=True, cwd=self.path_buildFldr)
+            for sutCovListItem in sutList:
+                cmd_gcov.option(str(Path(self.str_TpkgRoot, sutCovListItem)))
+
+            cmd_out = cmd_gcov.cd(self.path_buildFldr).outAsList().run()
+            cover_out = cmd_out.stdout
+
             lst_file, dict_covFile = tdd_support.interpretGCOV2lists(
                 cover_out, self.path_buildFldr)
             if not lst_file:
@@ -627,42 +609,31 @@ class CTestPkg():
     def __staticCheck__(self, sutList: [str]):
         if self.tCfg.co_staticAnalysis.isTurnedOn:
             self.__writeStep__("StaticCheck")
-            op_lst = []
-            op_lst.append("cppcheck")
 
-            op_lst.append("--enable=all")
-            op_lst.append("--inconclusive")
-            op_lst.append("--library=posix")
+            cmd = vs.prepare("cppcheck")
+            cmd.option("--enable=all")
+            cmd.option("--inconclusive")
+            cmd.option("--library=posix")
 
             if not self.tCfg.co_staticAnalysis.isLanguageDefinedBySuffix:
-                op_lst.append("--language="
-                              + self.tCfg.co_staticAnalysis.str_ForcedLang)
-
-            op_lst.append("--std=" + self.tCfg.co_staticAnalysis.str_c_version)
-            op_lst.append(
-                "--std=" + self.tCfg.co_staticAnalysis.str_cpp_version)
+                cmd.option("--language=" + self.tCfg.co_staticAnalysis.str_ForcedLang)
 
             for supp in self.tCfg.co_staticAnalysis.suppressionLst:
-                op_lst.append("--suppress=" + supp)
+                cmd.option("--suppress=" + supp)
+
             # TODO add switch for turning all to C++ file. Configurable from test.ini
             # add c++ version standard
             # op_statCheck += "--std=c++11 "
-            check_out = str(self.path_buildFldr / "cppcheck.out")
-            check_err = str(self.path_buildFldr / "cppcheck.err")
+            #check_out = str(self.path_buildFldr / "cppcheck.out")
+            #check_err = str(self.path_buildFldr / "cppcheck.err")
             for sutListItem in sutList:
-                op_lst.append(str(self.path_buildFldr / sutListItem))
+                cmd.option(str(self.path_buildFldr / sutListItem))
 
-            op_lst.append("-I")
-            op_lst.append(str(self.path_buildFldr / ".." / self.str_srcFldr))
+            cmd.option("--std=" + self.tCfg.co_staticAnalysis.str_c_version)
+            cmd.param("-I", str(self.path_buildFldr / ".." / self.str_srcFldr))
+            cmd_out = cmd.stderrAsList().run()
 
-            op_lst.append(">")
-            op_lst.append(check_out)
-
-            op_lst.append("2>")
-            op_lst.append(check_err)
-
-            # print(op_lst)
-            subprocess.call(op_lst, shell=True)
+            check_err = cmd_out.stderr
 
             numOfError = tdd_support.interpretCPPCHECKerrors(check_err)
             if numOfError != 0:
@@ -673,12 +644,15 @@ class CTestPkg():
 
             if not self.b_silent:
                 print("Number of static check errors: ", self.str_analysis)
+                print()
+                """
                 if numOfError:
                     numL = 40
                     print(numL*'-' + '\n')
                     with open(check_err, 'r') as fin:
                         print(fin.read())
                     print(numL*'-')
+                """
         else:
             self.str_analysis = Fore.YELLOW + "OFF" + Style.RESET_ALL
 
@@ -687,8 +661,6 @@ class CTestPkg():
             self.__writeStep__("Analysis")
 
             lizardCsv = str(self.path_buildFldr / "lizard.csv")
-            lizard_out = str(self.path_buildFldr / "lizard.out")
-            lizard_err = str(self.path_buildFldr / "lizard.err")
 
             # choose used parameters
             if self.tCfg.co_codeStatistics.isUsedTestSpecificOnly == True:
@@ -705,30 +677,14 @@ class CTestPkg():
                     int_FncLen = self.mCfg.co_stat.int_fncLength
                     int_ParCnt = self.mCfg.co_stat.int_paramCnt
 
-            op_lst = []
-            op_lst.append('lizard')
+            cmd = vs.prepare('lizard')
             for sutListItem in sutList:
-                op_lst.append(str(self.path_buildFldr / sutListItem))
-
-            op_lst.append("-C")
-            op_lst.append(str(int_McCabeCompl))
-
-            op_lst.append("-L")
-            op_lst.append(str(int_FncLen))
-
-            op_lst.append("-a")
-            op_lst.append(str(int_ParCnt))
-
-            op_lst.append("-o")
-            op_lst.append(lizardCsv)
-
-            op_lst.append(">")
-            op_lst.append(lizard_out)
-
-            op_lst.append("2>")
-            op_lst.append(lizard_err)
-
-            subprocess.call(op_lst, shell=True)
+                cmd.option(str(self.path_buildFldr / sutListItem))
+            cmd.param("-C", str(int_McCabeCompl))
+            cmd.param("-L", str(int_FncLen))
+            cmd.param("-a", str(int_ParCnt))
+            cmd.param("-o", lizardCsv)
+            cmd.run()
 
             errTab = CodeStatistics.interpretLIZARDoutfile(
                 lizardCsv, int_McCabeCompl, int_ParCnt, int_FncLen)

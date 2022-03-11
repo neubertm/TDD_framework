@@ -60,17 +60,25 @@ def include(cmd_name: str):
 def prepare(cmd: str):
     return Shell(cmd)
 
+class ShellOutput:
+    def __init__(self, code):
+        self.returncode = code
+        self.stdout = ""
+        self.stderr = ""
+
+
 # =============================================================================
 #  Shell - Public
 # =============================================================================
 
 class Shell:
-    isVerbose = False
+    isVerbose = True
 
     def __init__(self, cmd):
-        self.isGettingOuput = False
+        self.noshow = True
+        self.isGettingOuput = None
         self.isCheckingFail = False
-        self.TypeOfOuput = None
+        self.isGettingStderr = None
         self.out = ""
         if isinstance(cmd, str):
             self.cmd = cmd.split(" ")
@@ -80,7 +88,14 @@ class Shell:
             raise BaseException("Invalid type of parameter, only string or list")
         self.chroot = "./"
 
+    def param(self, key: str, val: str):
+        self.cmd.append(key)
+        self.cmd.append(val)
+        return self
 
+    def option(self, val: str):
+        self.cmd.append(val)
+        return self
 
     def run(self):
         # Verbose
@@ -88,48 +103,86 @@ class Shell:
             print(self.cmd)
 
         # open the process
-        proc = subprocess.Popen(self.cmd, cwd=self.chroot, stdout=subprocess.PIPE)
+        if self.noshow:
+            proc = subprocess.Popen(self.cmd, cwd=self.chroot, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        else:
+            if self.isGettingOuput == None:
+                if self.isGettingStderr == None:
+                    proc = subprocess.Popen(self.cmd, cwd=self.chroot)
+                else:
+                    proc = subprocess.Popen(self.cmd, cwd=self.chroot, stderr=subprocess.PIPE)
+            else:
+                if self.isGettingStderr == None:
+                    proc = subprocess.Popen(self.cmd, cwd=self.chroot, stdout=subprocess.PIPE)
+                else:
+                    proc = subprocess.Popen(self.cmd, cwd=self.chroot, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+
         #stdout, stderr = fp.communicate()
 
         # read the stdout
-        if self.TypeOfOuput == "str":
-            self.out = ""
+        """
+        if self.isGettingOuput == "str":
+            self.stdout = ""
             while True:
                 line = proc.stdout.readline()
                 if not line:
                     break
-                self.out += line.decode("UTF-8")
+                self.stdout += line.decode("UTF-8")
 
-        if self.TypeOfOuput == "list":
-            self.out = []
+        if self.isGettingOuput == "list":
+            self.stdout = []
             while True:
                 line = proc.stdout.readline()
                 if not line:
                     break
-                self.out.append(line.decode("UTF-8"))
-        else:
-            proc.communicate()
+                self.stdout.append(line.decode("UTF-8"))
+        """
+
+        stdout, stderr = proc.communicate()
+        retval = ShellOutput(proc.returncode)
+        # convert the stdout
+        if self.isGettingOuput == "str":
+            retval.stdout = stdout.decode("UTF-8")
+        elif self.isGettingOuput == "list":
+            retval.stdout = stdout.decode("UTF-8").split('\n')
+
+        # convert the stderr
+        if self.isGettingStderr == "str":
+            retval.stderr = stderr.decode("UTF-8")
+        elif self.isGettingStderr == "list":
+            retval.stderr = stderr.decode("UTF-8").split('\n')
 
         # check if the command failed
         if self.isCheckingFail:
-            code = proc.returncode
-            if code != 0:
+            if proc.returncode != 0:
                 raise BaseException("ERROR")
 
-        return self.out
+        return retval
 
     def outAsStr(self):
-        self.isGettingOuput = True
-        self.TypeOfOuput = "str"
+        self.isGettingOuput = "str"
         return self
 
     def outAsList(self):
-        self.isGettingOuput = True
-        self.TypeOfOuput = "list"
+        self.isGettingOuput = "list"
+        return self
+
+    def stderrAsStr(self):
+        self.isGettingStderr = "str"
+        return self
+
+    def stderrAsList(self):
+        self.isGettingStderr = "list"
+        return self
+
+    def quietly(self, isNoShow):
+        self.noshow = True # isNoShow
         return self
 
     def checkFail(self):
         self.isCheckingFail = True
+        return self
 
     def cd(self, path: str):
         self.chroot = path
