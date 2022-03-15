@@ -128,7 +128,7 @@ def debug(lstPackage, mainCfg):
 def tests_minimized(lstPackage, mainCfg):
     colorama.init()
     backUpEnvVariable()
-    setEnvVariable(mCfg.co_env)
+    setEnvVariable(mainCfg.co_env)
 
     kpt = KeyPressThread.KeyboardThread()
 
