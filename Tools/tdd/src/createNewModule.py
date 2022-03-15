@@ -231,6 +231,7 @@ class CreateNewModule():
         self.createHeaderFile()
         self.createSourceFile()
         self.copyAndCreateTestFiles()
+        self.copyAndCreateMemLeakMacroFiles()
         self.createTestInitFile()
         self.createTestCMakefile()
         pass
@@ -521,6 +522,17 @@ class CreateNewModule():
         str_dst = str(pTestFldr / 'test.cpp')
         processFile(str_src,str_dst, dict)
 
+    def copyAndCreateMemLeakMacroFiles(self):
+        pDstFldr = Path(self.str_TPKG_FOLDER) / self.pkgDesc.str_srctestfldr
+        pSrcDefaultFldr = Path('Tools') / 'defaults' / 'src_templates'
+        checkIfFolderExists(pDstFldr)
+
+        str_memLeakDetectionNewMacFile = 'MemLeakDetectionNewMacros.h'
+        str_memLeakDetectionMalMacFile = 'MemLeakDetectionMallocMacros.h'
+
+        copyTxtFile(str(pSrcDefaultFldr / str_memLeakDetectionNewMacFile),str(pDstFldr / str_memLeakDetectionNewMacFile))
+        copyTxtFile(str(pSrcDefaultFldr / str_memLeakDetectionMalMacFile),str(pDstFldr / str_memLeakDetectionMalMacFile))
+        pass
 
     def createTestInitFile(self):
         pTestFldr = Path(self.str_TPKG_FOLDER)
