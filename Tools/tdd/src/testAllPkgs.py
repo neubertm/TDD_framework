@@ -442,8 +442,10 @@ class CTestPkg():
             chckF: os.stat(chckF).st_mtime for chckF in self.LS_chckLFile}
         for id_file, str_file in enumerate(self.LS_chckLFile):
             if locdic_chckFiles.get(str_file) != self.dic_chckFiles.get(str_file):
-                Path(self.LS_dstL[id_file]).write_text(
-                    Path(self.LS_srcL[id_file]).read_text())
+                # check list could be bigger than source and dst list.
+                if id_file < len(self.LS_dstL):
+                    Path(self.LS_dstL[id_file]).write_text(
+                        Path(self.LS_srcL[id_file]).read_text())
         self.dic_chckFiles = locdic_chckFiles
 
     def __cmake__(self):

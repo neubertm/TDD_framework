@@ -150,6 +150,7 @@ def processAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, t
     strPathToTmpTestSrcFldr = str(pPathToTmpTestSrcFldr)
     pTmpTestSrcFullPath = pPathToTmpTestSrcFldr / tmpTestSrcFldr
     str_TstSrcPth = str(pTmpTestSrcFullPath)
+    pSrcFldForTestMainAndCoreFile = pPathToTmpTestSrcFldr / mainCfg.co_pkg.str_srctestfldr
 
     # # start with SUT
     dict = testCfg.SUT_dict
@@ -233,10 +234,8 @@ def processAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, t
         assert pSrcFile.exists(), "Unexisting file: %s. Please check %s\\test.ini file." % (
             srcFile, str_pkgName)
     # copy test.cpp and AllTests.cpp to tmpSourceFolder
-    srcLst.append(str(pPathToTmpTestSrcFldr
-                  / mainCfg.co_pkg.str_srctestfldr / "test.cpp"))
-    srcLst.append(str(pPathToTmpTestSrcFldr
-                  / mainCfg.co_pkg.str_srctestfldr / "AllTests.cpp"))
+    srcLst.append(str(pSrcFldForTestMainAndCoreFile / "test.cpp"))
+    srcLst.append(str(pSrcFldForTestMainAndCoreFile / "AllTests.cpp"))
 
     dstLst.append(str(pTmpTestSrcFullPath / "test.cpp"))
     dstLst.append(str(pTmpTestSrcFullPath / "AllTests.cpp"))
@@ -254,6 +253,10 @@ def processAllFilesAndReturnListOfThem(str_pkgName: str, mainCfg: CMainConfig, t
     chckLst = srcLst.copy()
     chckLst.append(str(pPathToTmpTestSrcFldr
                    / mainCfg.co_pkg.str_testcfgfilename))
+
+    # next two lines added check if user redefine mem leak detection macros
+    chckLst.append(str(pSrcFldForTestMainAndCoreFile / "MemLeakDetectionMallocMacros.h"))
+    chckLst.append(str(pSrcFldForTestMainAndCoreFile / "MemLeakDetectionNewMacros.h"))
 
 
     # define mock src file (HEADER)
