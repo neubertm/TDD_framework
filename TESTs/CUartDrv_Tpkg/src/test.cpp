@@ -46,93 +46,9 @@ IGNORE_TEST(CUartDrv, TemplateIgnoredTestWithHelp)
 	*/
 }
 
-TEST(CUartDrv, CreateInstanceOfCUartDrv)
-{
-  CHalUartIt o_halUart;
-  CUartDrv o_uartDrv(o_halUart);
-
-}
-
-TEST(CUartDrv, CreateInstanceOfCUartDrvConnectObserver)
-{
-  CHalUartIt o_halUart;
-  CUartDrv o_uartDrv(o_halUart);
-
-
-  mock().expectOneCall("IHalNonBlocking.i_setObserver").withParameter("IHalObserver*",dynamic_cast<IHalObserver*>(&o_uartDrv));
-  o_halUart.i_setObserver(&o_uartDrv);
-}
-
-TEST(CUartDrv, InitializationOk)
-{
-  CHalUartIt o_halUart;
-  CUartDrv o_uartDrv(o_halUart);
-
-
-  mock().expectOneCall("IHalNonBlocking.i_setObserver").withParameter("IHalObserver*",dynamic_cast<IHalObserver*>(&o_uartDrv));
-  o_halUart.i_setObserver(&o_uartDrv);
-
-  mock().expectOneCall("CHalUartIt.i_init").andReturnValue(true);
-  CHECK_TRUE(o_uartDrv.i_init());
-  CHECK_EQUAL(DRV_STATE_READY, o_uartDrv.getState());
-}
-
-TEST(CUartDrv, InitializationFalse)
-{
-  CHalUartIt o_halUart;
-  CUartDrv o_uartDrv(o_halUart);
-
-
-  mock().expectOneCall("IHalNonBlocking.i_setObserver").withParameter("IHalObserver*",dynamic_cast<IHalObserver*>(&o_uartDrv));
-  o_halUart.i_setObserver(&o_uartDrv);
-
-  mock().expectOneCall("CHalUartIt.i_init").andReturnValue(false);
-  CHECK_FALSE(o_uartDrv.i_init());
-  CHECK_EQUAL(DRV_STATE_ERROR, o_uartDrv.getState());
-}
-
-TEST(CUartDrv, ReadyToWrite_WeAreInReadyState)
-{
-  CHalUartIt o_halUart;
-  CUartDrv o_uartDrv(o_halUart);
-
-
-  mock().expectOneCall("IHalNonBlocking.i_setObserver").withParameter("IHalObserver*",dynamic_cast<IHalObserver*>(&o_uartDrv));
-  o_halUart.i_setObserver(&o_uartDrv);
-
-  mock().expectOneCall("CHalUartIt.i_init").andReturnValue(true);
-  CHECK_TRUE(o_uartDrv.i_init());
-
-
-  CHECK_TRUE(o_uartDrv.isReadyToWrite());
-}
-
-
-TEST(CUartDrv, ReadyToWrite_WriteData)
-{
-  CHalUartIt o_halUart;
-  CUartDrv o_uartDrv(o_halUart);
-
-
-  mock().expectOneCall("IHalNonBlocking.i_setObserver").withParameter("IHalObserver*",dynamic_cast<IHalObserver*>(&o_uartDrv));
-  o_halUart.i_setObserver(&o_uartDrv);
-
-  mock().expectOneCall("CHalUartIt.i_init").andReturnValue(true);
-  CHECK_TRUE(o_uartDrv.i_init());
-
-
-  CHECK_TRUE(o_uartDrv.isReadyToWrite());
-
-  const uint32_t cu32_length = 10;
-  uint8_t au8_data[cu32_length] = {1,2,3,4,5,6,7,8,9};
-  mock().expectOneCall("CHalUartIt.transmit").withParameter("cu8_pData",const_cast<const uint8_t*>(au8_data)).withParameter("cu32_len",cu32_length);
-  o_uartDrv.write(au8_data,cu32_length);
-
-  CHECK_FALSE(o_uartDrv.isReadyToWrite())
-
-  //interrupt call HAL -> write to observer inform that we can write again
-  mock().expectOneCall("CHalUartIt.i_notify").andReturnValue(static_cast<uint32_t>(HAL_UART_TX));
-  o_halUart.i_notify();
-
-  CHECK_TRUE(o_uartDrv.isReadyToWrite())
-}
+//TEST(CUartDrv, CreateInstanceOfCUartDrv)
+//{
+//  CHalUartIt o_halUart;
+//  CUartDrv o_uartDrv(o_halUart);
+//
+//}

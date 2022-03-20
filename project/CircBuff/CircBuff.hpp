@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 
 template <class T, int N>
 class CircBuff
@@ -10,11 +9,8 @@ public:
 
   virtual ~CircBuff();
 
-  bool push(const T[], int32_t i32_len);
+  bool push(const T[], unsigned int i32_len);
   bool push(const T);
   T pull();
   bool isNonEmpty() const;
-
-private:
-  
 };

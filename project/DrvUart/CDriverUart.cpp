@@ -28,8 +28,7 @@ bool CDriverUart::i_init()
  */
 uint8_t CDriverUart::i_readUartByte()
 {
-    // Save the value to be returned
-    return  o_mRXbuff.pull();
+
 }
 
 /**
@@ -38,7 +37,7 @@ uint8_t CDriverUart::i_readUartByte()
  */
 bool CDriverUart::i_isUartByteAvailable() const
 {
-    return o_mRXbuff.isNonEmpty();
+
 }
 
 /**
@@ -50,14 +49,6 @@ bool CDriverUart::i_isUartByteAvailable() const
  */
 bool CDriverUart::i_writeUartBuf(const uint8_t pui8_pSendBuf[], const uint8_t ui8_pBufLen)
 {
-    bool b_lRetVal = o_mTXbuff.push(pui8_pSendBuf,ui8_pBufLen);
-    if( true == b_lRetVal )
-    {
-      ro_mHalUart.i_sendByte(o_mTXbuff.pull());
-    }
-
-
-    return b_lRetVal;
 
 }
 
@@ -70,21 +61,12 @@ bool CDriverUart::i_writeUartBuf(const uint8_t pui8_pSendBuf[], const uint8_t ui
  */
 EReceiverStatus_t CDriverUart::i_getUartReceiverStatus()
 {
-    // Save receiver status in temp variable
-    EReceiverStatus_t e_lRetVal = e_mRecvState;
-    // Reset receiver status
-    e_mRecvState = RECEIVER_STATUS_OK;
-    //Return receiver status before reset
-    return e_lRetVal;
+
 }
 
 
 void CDriverUart::i_notifyTx()
 {
-    if(o_mTXbuff.isNonEmpty())
-    {
-      ro_mHalUart.i_sendByte(o_mTXbuff.pull());
-    }
 }
 
 /**
@@ -93,17 +75,10 @@ void CDriverUart::i_notifyTx()
  */
 void CDriverUart::i_notifyRx(const uint8_t cu8_byte)
 {
-    // Save byte
-    if (false == o_mRXbuff.push(static_cast<const uint8_t*>(&cu8_byte),1))
-    {
-      e_mRecvState = RECEIVER_STATUS_OVERFLOW;
-    }
+
 }
 
 void CDriverUart::i_error(const uint8_t cu8_errID)
 {
-  (void) cu8_errID;
-    // Print error to stderr to avoid
-    // unused variable warning
-    //std::cerr << ui8_errID;
+
 }

@@ -26,20 +26,6 @@ public:
   void i_notifyRx(const uint8_t cu8_byte) override;
   void i_error(const uint8_t cu8_errID) override;
 
-  static const uint8_t cui8_mMaxBufferContent  = 10;
 private:
 
-  IHalUart& ro_mHalUart;
-
-  static const uint16_t cui16_mErrorRange   = 0x8000;
-
-  // Transmit
-  CircBuff<uint8_t,cui8_mMaxBufferContent> o_mTXbuff;
-
-
-  // Receive
-  CircBuff<uint8_t,cui8_mMaxBufferContent> o_mRXbuff;
-
-
-  EReceiverStatus_t e_mRecvState;
 };
