@@ -562,13 +562,13 @@ class CTestPkg():
             cover_err = str(self.path_buildFldr / "coverage.err")
 
             covCmdLst = []
+            # gcovr --object-directory CMakeFiles\TestApp.dir\mingw_tmp_single -r ..\mingw_tmp_single\ -f "\.\./mingw_tmp_single/Calculator.cpp" -b --txt cov_vypis.txt --html cov\cov_html.html --html-details cov\coverage_details.html
             covCmdLst.append("gcov")
             covCmdLst.append("--object-directory")
             covCmdLst.append(
                 str(Path("CMakeFiles") / "TestApp.dir" / self.str_srcFldr))
             for sutCovListItem in sutList:
                 covCmdLst.append(str(Path(self.str_TpkgRoot, sutCovListItem)))
-
             covCmdLst.append(">")
             covCmdLst.append("coverage.out")
             covCmdLst.append("2>")

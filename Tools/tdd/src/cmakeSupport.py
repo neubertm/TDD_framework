@@ -102,6 +102,9 @@ class CCMakeGenerator():
             # Add switches to generate gcov files
         self.writeToCMakefileCoverageSection()
 
+        ## generate build database
+        self.writeToCMakeExportCompileCommands()
+
 
             # next include macro header is code injection in to production code. Overriding malloc and operator new.
         self.writeToCMakefileUsageOfMemLeakDetectionMacros()
@@ -214,6 +217,11 @@ class CCMakeGenerator():
 
 
         self.writeToCMakefileAddIncludeDirsEnd()
+
+
+    def writeToCMakeExportCompileCommands(self):
+        self.writeToFile( "\nset(CMAKE_EXPORT_COMPILE_COMMANDS ON)\n" )
+        self.writeToFile( "set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES Off)\n")
 
     def writeToCMakefileAddFindLinkTestLibrary(self):
         str_compilerName = self.testCfg.co_testToolchain.str_compiler
