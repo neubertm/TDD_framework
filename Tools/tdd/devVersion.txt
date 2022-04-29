@@ -1,5 +1,5 @@
-Time_UTC:  2022-04-22 08:12:11
-Branch:  main
+Time_UTC:  2022-04-29 11:03:09
+Branch:  mne_coverage_refactoring
 Name:  Milan Neubert
 Email:  milan.neubert@siemens.com
-HASH: 525b5d79bdea013ea4a0fb5d2319df2015b0fe0a
+HASH: 31e6df2422221035c86fdc743ca4da09cdfc3b50

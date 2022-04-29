@@ -40,7 +40,7 @@ from tabulate import tabulate
 import CodeStatistics
 import colorama
 from colorama import Fore, Style
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import subprocess
 import KeyPressThread
 import keyboard
@@ -557,12 +557,60 @@ class CTestPkg():
         # if tdd_support.isCoverageEnabled(self.tCfg):
         if self.tCfg.co_coverage.isTurnedOn:
             self.__writeStep__("Coverage")
+            # Create cov folder
+            path_covFld = self.path_buildFldr / 'cov'
+            if not path_covFld.is_dir():
+                path_covFld.mkdir(mode=666)
+            # gcovr --object-directory CMakeFiles\TestApp.dir\mingw_tmp_single -r ..\mingw_tmp_single\ -f "\.\./mingw_tmp_single/Calculator.cpp" -b --txt cov_vypis.txt --html cov\cov_html.html --html-details cov\coverage_details.html
+            covCmdLst = []
+            # gcovr
+            covCmdLst.append("gcovr")
+            # definition of object directory location
+            covCmdLst.append("--object-directory")
+            covCmdLst.append(
+                str(Path("CMakeFiles") / "TestApp.dir" / self.str_srcFldr))
+
+            #root of source files
+            covCmdLst.append("--root")
+            covCmdLst.append( str( Path('..') / self.str_srcFldr) )
+
+            #filter only SUT files
+            print(sutList)
+            if not sutList:
+             pass
+            else:
+                for sutCovListItem in sutList:
+                    #filtF = str(Path(sutCovListItem).resolve())
+                    filtF = Path(sutCovListItem).name
+                    # filtF.replace('\:\\\\','\:\\')
+                    #print( filtF )
+                    #print( filtF.replace(':\\','&').replace('\\','/').replace('&',':\\') )
+                    # filtF = filtF.replace('\\','/')
+
+                    #if 'cpp' in filtF :
+                    covCmdLst.append("--filter")
+                    covCmdLst.append('.+/' + filtF )
+
+            #txt output
+            covCmdLst.append('--txt')
+            covCmdLst.append( str( (path_covFld / 'coverage.txt').resolve() ) )
+
+            #html output
+            covCmdLst.append('--html')
+            covCmdLst.append( str( (path_covFld / 'coverage.html').resolve() ) )
+
+            #html output
+            covCmdLst.append('--html-details')
+            covCmdLst.append( str( (path_covFld / 'coverage_details.html').resolve() ) )
+
+            print(covCmdLst)
+            subprocess.call(covCmdLst, shell=True, cwd=self.path_buildFldr)
 
             cover_out = str(self.path_buildFldr / "coverage.out")
             cover_err = str(self.path_buildFldr / "coverage.err")
 
             covCmdLst = []
-            # gcovr --object-directory CMakeFiles\TestApp.dir\mingw_tmp_single -r ..\mingw_tmp_single\ -f "\.\./mingw_tmp_single/Calculator.cpp" -b --txt cov_vypis.txt --html cov\cov_html.html --html-details cov\coverage_details.html
+
             covCmdLst.append("gcov")
             covCmdLst.append("--object-directory")
             covCmdLst.append(
