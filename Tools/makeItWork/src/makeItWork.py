@@ -33,11 +33,16 @@ import os
 import sys
 import subprocess
 from pathlib import Path
+from shutil import rmtree # shutil has been included in Python since before 2.3.
 
 toolsFldr = "Tools"
 rootLibsFldr = os.path.join(toolsFldr, "testlibs")
 tmp_folder = os.path.join(toolsFldr, "makeItWorkTmp")
 
+
+# =============================================================================
+#  Functions to install the Python Packages
+# =============================================================================
 
 def termination():
     # input("Press any key to finish.")
@@ -101,6 +106,10 @@ def installPythonPackage(packageName):
         print("pip install ", packageName, " failed")
         termination()
 
+
+# =============================================================================
+#  Script to install the missed python packages
+# =============================================================================
 
 # Section of trying include packages when it failed. We try it install.
 # # Section of includes important for this script them self.
@@ -233,6 +242,9 @@ def del_folder(path):
             sub.unlink()
     path.rmdir()
 
+# =============================================================================
+#  SoftwareAndTools
+# =============================================================================
 
 class SoftwareAndTools:
     str_appName: str
@@ -339,6 +351,10 @@ class SoftwareAndTools:
                               + "Script will be terminated!"))
             termination()
 
+
+# =============================================================================
+#  TestingLibrary
+# =============================================================================
 
 class TestingLibrary():
     # str_libName : str
@@ -503,6 +519,9 @@ class TestingLibrary():
             return
         self.fnc_copyLib(compiler, srcFldr)
 
+# =============================================================================
+#  Util Functions
+# =============================================================================
 
 def questionYesNo(QuestionOfText):
     bRetVal = False
@@ -559,11 +578,6 @@ def find_files_firstOnly(fileNames, search_path):
         else:
             break
     return(result)
-
-
-def makeTmpFolder():
-    # os.mkdir(makeItWorkTmp)
-    os.mkdir(tmp_folder)
 
 
 def python_version():
@@ -972,26 +986,41 @@ def updateConfigFile(sfDic):
         print("Project ini file not found?!! Creating new one.")
         createCfgFromTemplate(sfDic)
 
-    #createCfgFromTemplate(sfDic)
+# =============================================================================
+#  Log Functions
+# =============================================================================
 
-# print(os.popen("wmic diskdrive list").readlines())
-# os.system("wmic diskdrive list brief")
-# exit(0)
+def printError(text, *args):
+    print(Fore.RED + text, *args)
+    termination()
 
+def printWarn(text, *args):
+    print(Fore.YELLOW + text, *args)
+
+def printInfo(text, *args):
+    print(Fore.MAGENTA + text, *args)
+
+def printOk(text, *args):
+    print(Fore.GREEN + text, *args)
+
+def printAlert(text, *args):
+    print(Fore.RED + text, *args)
+
+# =============================================================================
+#  Main
+# =============================================================================
 
 colorama.init(autoreset=True)
-
-print(Fore.MAGENTA + "Finding or installing & checking important tools.")
+printInfo("Finding or installing & checking important tools.")
 
 # Check python version and if it is installed and path is set or in variable
-print(Fore.YELLOW + "Python check version:")
+printWarn("Python check version:")
 ST_python = SoftwareAndTools("python", checkPythonVersion)
 if not ST_python.checkInPath():
-    termination
-
+    termination()
 
 # Check that pip is installed in path
-print(Fore.YELLOW + "Python pip check version:")
+printWarn("Python pip check version:")
 ST_pip = SoftwareAndTools("pip", checkPipVersion)
 if not ST_pip.checkInPath():
     termination()
@@ -999,14 +1028,11 @@ if not ST_pip.checkInPath():
 ST_list = []
 
 # Check if CMake is installed in path
-# cmakeStatus =checkCMake()
-
 cmakeLink = ('https://github.com/Kitware/CMake/releases/download/v3.20.3/'
              + 'cmake-3.20.3-windows-x86_64.msi')
 ST_cmake = SoftwareAndTools("cmake", checkCMake, cmakeLink)
 ST_list.append(ST_cmake)
 # ST_cmake.checkDownloadInstall()
-
 
 # Check if gcc is installed in path
 gccLink = ('https://sourceforge.net/projects/mingw-w64/files/'
@@ -1033,16 +1059,61 @@ cppumockgenLink = ('https://github.com/jgonzalezdr/CppUMockGen/releases/'
 ST_cppumockgen = SoftwareAndTools('CppUMockGen', checkCppUMockGen, cppumockgenLink)
 ST_list.append(ST_cppumockgen)
 
+libCppUTest = TestingLibrary(
+    'cpputest',
+    ("https://github.com/cpputest/cpputest/releases/download/"
+     + "v3.8/cpputest-3.8.zip"),
+    copyCppUTestLib)
+
+# Rebuild Command
+if len(sys.argv) > 1 and sys.argv[1] == "rebuild":
+    # get the name of config file
+    configfile = './envPath.ini'
+    if len(sys.argv) > 2:
+        configfile = sys.argv[2]
+
+    # parse the configuration file
+    parser = configparser.ConfigParser()
+    if not Path(configfile).exists():
+        printError("File {} not found".format(configfile))
+    parser.read(configfile)
+
+    # Delete old tmp_folder/libs
+    tmp_lib_path = Path(tmp_folder) / "libs"
+    if tmp_lib_path.exists():
+        printAlert("Deleting the old temporary folder {}".format(tmp_lib_path))
+        rmtree(tmp_lib_path)
+
+    try:
+        # get the GCC Path
+        gcc_path = parser["MINGW"]["ENV_CONFIG_SCRIPT"]
+        printInfo("using compiler in {}".format(gcc_path))
+        os.environ['PATH'] = gcc_path + ';' + os.environ['PATH']
+
+        # get the CMake Path
+        cmake_path = parser["CMAKE"]["ENV_CONFIG_SCRIPT"]
+        printInfo("using cmake in {}".format(cmake_path))
+        os.environ['PATH'] = cmake_path + ';' + os.environ['PATH']
+
+        # check CMake and install the libCppUTest
+        libCppUTest.makeItReady()
+        termination()
+
+    except KeyError as field:
+        print("Parameter ",field," not found in the file envPath.ini")
+        termination()
+
+
+# Normal Execution
 for sw in ST_list:
     sw.checkDownloadInstall()
 
-print(Fore.GREEN + "Minimal toolchain is complete.\n")
+printOk("Minimal toolchain is complete.\n")
 
-print(Fore.MAGENTA + "Downloading unpacking & compiling testing libraries.")
+printInfo("Downloading unpacking & compiling testing libraries.")
 
 # adding toolchain to the local path
 for sw in ST_list:
-    # print(sw.str_pathInSystem)
     head, tail = os.path.split(sw.str_pathInSystem)
     os.environ['PATH'] = head + ";" + os.environ['PATH']
 
@@ -1051,11 +1122,6 @@ swPathDict = {sw.str_appName: os.path.split(sw.str_pathInSystem)[
 print("Check inifile.")
 updateConfigFile(swPathDict)
 
-libCppUTest = TestingLibrary(
-    'cpputest',
-    ("https://github.com/cpputest/cpputest/releases/download/"
-     + "v3.8/cpputest-3.8.zip"),
-    copyCppUTestLib)
 libGTest = TestingLibrary(
     'googletest',
     "https://github.com/google/googletest/archive/refs/heads/master.zip")
@@ -1067,21 +1133,3 @@ libCppUTest.makeItReady("mingw")
 # # update configuration file according found software path
 
 termination()
-
-# print(Fore.YELLOW + "Extracting cpputest library.")
-# fileName = os.path.join("Tools","Downloads","cpputest-3.8.zip")
-# destFldr = os.path.join("Tools","makeItWorkTmp")
-# unpackFile(fileName,destFldr)
-# if os.path.exists(destFldr):
-#     print(Fore.GREEN + "CppUTest unpack correctly.")
-# else:
-#     print(Fore.RED + "CppUTest unpack failed.")
-
-# print(Fore.YELLOW + "Extracting gtest library.")
-# fileName = os.path.join("Tools","Downloads","master.zip")
-# destFldr = os.path.join("Tools","makeItWorkTmp")
-# unpackFile(fileName,destFldr)
-# if os.path.exists(destFldr):
-#     print(Fore.GREEN + "gTest unpack correctly.")
-# else:
-#     print(Fore.RED + "gTest unpack failed.")
