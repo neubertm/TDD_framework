@@ -69,11 +69,35 @@ def backUpEnvVariable():
     env_bckp = os.environ.copy()
 
 def setEnvVariable(co_env: CEnvCfg):
-    os.environ['PATH'] = co_env.str_cmake + ";" + os.environ['PATH']
-    os.environ['PATH'] = co_env.str_mingw + ";" + os.environ['PATH']
-    os.environ['PATH'] = co_env.str_cppcheck + ";" + os.environ['PATH']
-    os.environ['PATH'] = co_env.str_clang + ";" + os.environ['PATH']
-    os.environ['PATH'] = co_env.str_cppumockgen + ";" + os.environ['PATH']
+    # print('os.environ[PATH] is ' + os.environ['PATH'] )
+    pathJoinStr = ":"
+    if os.name == "nt":
+        pathJoinStr = ";"
+    
+    # print('pathJoinStr is ' + pathJoinStr)
+
+    if co_env.str_cmake:
+        # print(co_env.str_cmake)
+        os.environ['PATH'] = co_env.str_cmake + pathJoinStr + os.environ['PATH']
+    
+    if co_env.str_mingw:
+        # print(co_env.str_mingw)
+        os.environ['PATH'] = co_env.str_mingw + pathJoinStr + os.environ['PATH']
+    
+    if co_env.str_cppcheck:
+        # print(co_env.str_cppcheck)
+        os.environ['PATH'] = co_env.str_cppcheck + pathJoinStr + os.environ['PATH']
+    
+    if co_env.str_clang:
+        # print(co_env.str_clang)
+        os.environ['PATH'] = co_env.str_clang + pathJoinStr + os.environ['PATH']
+
+    if co_env.str_cppumockgen:
+        # print(co_env.str_cppumockgen)
+        os.environ['PATH'] = co_env.str_cppumockgen + pathJoinStr + os.environ['PATH']
+
+    # print('os.environ[PATH] is ' + os.environ['PATH'] )
+    # exit(-1)
 
 def resetEnvVariable():
     os.environ = env_bckp
@@ -410,7 +434,6 @@ class CTestPkg():
         self.__writeStep__("Creating CMakeLists")
         cmakeGen = CS.CCMakeGenerator(str_cmakelist, self.str_testType,self.mCfg, self.tCfg )
         cmakeGen.generate()
-        pass
 
     def __fileCopying__(self):
         self.__writeStep__("Copy files")
