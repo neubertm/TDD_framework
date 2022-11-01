@@ -94,6 +94,8 @@ class CEnvCfg:
     b_cmakeCheck: bool
     str_mingw: str
     b_mingwCheck: bool
+    str_gcc: str
+    b_gccCheck: bool
     str_msvc: str
     b_msvcCheck: bool
     str_clang: str
@@ -106,11 +108,13 @@ class CEnvCfg:
     def __init__(self):
         self.str_cmake = ""
         self.str_mingw = ""
+        self.str_gcc = ""
         self.str_msvc = ""
         self.str_clang = ""
         self.str_cppcheck = ""
         self.str_cppumockgen = ""
         self.b_cmakeCheck = True
+        self.b_mingwCheck = True
         self.b_mingwCheck = True
         self.b_msvcCheck = True
         self.b_clangCheck = True
@@ -129,6 +133,22 @@ class CEnvCfg:
         return(bRetVal)
 
     def _checkMingw_(self):
+        b_return = False
+        # TODO
+        return b_return
+
+    def _readGcc_(self, CPS: ConfigParser):
+        bRetVal = False
+        if "GCC" in CPS.keys():
+            CPS_GCC = CPS['GCC']
+            if 'ENV_CONFIG_SCRIPT' in CPS_GCC:
+                self.str_mingw = CPS_GCC['ENV_CONFIG_SCRIPT']
+                bRetVal = True
+            if 'check' in CPS_GCC:
+                self.b_mingwCheck = StrToBool(CPS_GCC['check'])
+        return(bRetVal)
+
+    def _checkGcc_(self):
         b_return = False
         # TODO
         return b_return

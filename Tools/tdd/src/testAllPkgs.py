@@ -49,7 +49,7 @@ import cmakeSupport as CS
 
 
 env_bckp = os.environ.copy()
-
+NewLine = '\n' if os.name == "nt" else '\r\n'
 
 def assertWithText(condition, text):
     '''
@@ -69,12 +69,7 @@ def backUpEnvVariable():
     env_bckp = os.environ.copy()
 
 def setEnvVariable(co_env: CEnvCfg):
-    # print('os.environ[PATH] is ' + os.environ['PATH'] )
-    pathJoinStr = ":"
-    if os.name == "nt":
-        pathJoinStr = ";"
-    
-    # print('pathJoinStr is ' + pathJoinStr)
+    pathJoinStr = ";" if os.name == "nt" else ":"
 
     if co_env.str_cmake:
         # print(co_env.str_cmake)
@@ -83,6 +78,11 @@ def setEnvVariable(co_env: CEnvCfg):
     if co_env.str_mingw:
         # print(co_env.str_mingw)
         os.environ['PATH'] = co_env.str_mingw + pathJoinStr + os.environ['PATH']
+
+    if co_env.str_gcc:
+        print(co_env.str_gcc)
+        os.environ['PATH'] = co_env.str_gcc + pathJoinStr + os.environ['PATH']
+        exit(-1)
     
     if co_env.str_cppcheck:
         # print(co_env.str_cppcheck)
@@ -500,7 +500,7 @@ class CTestPkg():
             op_cmakeLst.append("2>")
             op_cmakeLst.append(str(self.path_buildFldr / "cmake.err"))
 
-        # print(op_cmakeLst)
+        print(op_cmakeLst)
         subprocess.call(op_cmakeLst, shell=True)
 
     def __make__(self):
@@ -794,7 +794,7 @@ class CTestPkg():
     def __writeStep__(self, step: str):
         self.str_step = step
         if not self.b_silent:
-            print("\n" + Fore.YELLOW + self.str_step + Style.RESET_ALL)
+            print(NewLine + Fore.YELLOW + self.str_step + Style.RESET_ALL)
         pass
 
     def __checkExternalTerminationCondition__(self):
