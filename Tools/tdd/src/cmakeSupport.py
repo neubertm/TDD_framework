@@ -151,12 +151,12 @@ class CCMakeGenerator():
                 'SET(GCC_COVERAGE_LINK_FLAGS    "-coverage -lgcov")' "\n")
             self.writeToFile(
                 'SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS}'
-                " ${GCC_COVERAGE_COMPILE_FLAGS} -std=c++11 -Wall -Werror"
+                " ${GCC_COVERAGE_COMPILE_FLAGS} -std=c++11 -Wall -Wno-unknown-pragmas -Werror"
                 ' -pedantic")\n'
             )
             self.writeToFile(
                 'SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS}'
-                ' ${GCC_COVERAGE_COMPILE_FLAGS} -Wall -Werror -pedantic")\n'
+                ' ${GCC_COVERAGE_COMPILE_FLAGS} -Wall -Wno-unknown-pragmas -Werror -pedantic")\n'
             )
             self.writeToFile('SET(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE ON)\n')
             self.writeToFile('SET(CMAKE_C_OUTPUT_EXTENSION_REPLACE ON)\n')
