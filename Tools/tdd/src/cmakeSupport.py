@@ -229,10 +229,14 @@ class CCMakeGenerator():
             self.testCfg.co_testToolchain.str_testlib / str_compilerName
 
         strPathToTestLibs = '%s' % str(pathToTestLibs.as_posix())
-        self.writeToFile( 'find_library(TestLib    libCppUTest %s)\n' % (strPathToTestLibs)
+        if os.name == 'nt':
+            suffix = ''
+        else:
+            suffix = '.a'
+        self.writeToFile( 'find_library(TestLib    libCppUTest%s %s)\n' % (suffix ,strPathToTestLibs)
         )
         self.writeToFile(
-            'find_library(TestLibExt libCppUTestExt %s)\n\n' % (strPathToTestLibs)
+            'find_library(TestLibExt libCppUTestExt%s %s)\n\n' % (suffix, strPathToTestLibs)
         )
 
         # add target link library

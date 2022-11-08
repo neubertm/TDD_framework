@@ -49,7 +49,6 @@ import cmakeSupport as CS
 
 
 env_bckp = os.environ.copy()
-NewLine = '\n' if os.name == "nt" else '\r\n'
 
 def assertWithText(condition, text):
     '''
@@ -471,6 +470,14 @@ class CTestPkg():
                         Path(self.LS_srcL[id_file]).read_text())
         self.dic_chckFiles = locdic_chckFiles
 
+    def execute_command(self,commandLst, STDOUT, STDERR, CWD='.'):
+        #print(commandLst)
+        with open(STDOUT,'wb') as out, open(STDERR,"wb") as err:
+            if os.name == 'nt':
+                return subprocess.call(op_cmakeLst, shell=True, cwd=CWD, stdout=out, stderr=err)
+            else:
+                return subprocess.call(commandLst, shell=False, cwd=CWD, stdout=out, stderr=err)
+
     def __cmake__(self):
         self.__writeStep__("CMake")
         op_cmakeLst = []
@@ -493,15 +500,15 @@ class CTestPkg():
             op_cmakeLst.append('-DCMAKE_BUILD_TYPE=Debug')
 
         op_cmakeLst.append("-DCMAKELISTS_NAME=" + self.str_cmakeName)
+        outFile = str(self.path_buildFldr / "cmake.out")
+        errFile = str(self.path_buildFldr / "cmake.err")
         if self.b_silent:
-            op_cmakeLst.append(">")
-            op_cmakeLst.append(str(self.path_buildFldr / "cmake.out"))
+            # TODO now always silent -> add cmake.err check 
+            pass
 
-            op_cmakeLst.append("2>")
-            op_cmakeLst.append(str(self.path_buildFldr / "cmake.err"))
 
-        print(op_cmakeLst)
-        subprocess.call(op_cmakeLst, shell=True)
+        # print(op_cmakeLst)
+        self.execute_command(op_cmakeLst, outFile, errFile)
 
     def __make__(self):
         self.__writeStep__("Makefile")
@@ -521,14 +528,14 @@ class CTestPkg():
 
         op_makeLst.append('-C')
         op_makeLst.append(str(self.path_buildFldr))
+        outFile = str(self.path_buildFldr / "makefile.out")
+        errFile = str(self.path_buildFldr / "makefile.err")
         if self.b_silent:
-            op_makeLst.append('>')
-            op_makeLst.append(str(self.path_buildFldr / "makefile.out"))
+            # TODO now always silent -> add makefile.err check 
+            pass
 
-            op_makeLst.append('2>')
-            op_makeLst.append(str(self.path_buildFldr / "makefile.err"))
 
-        subprocess.call(op_makeLst, shell=True)
+        self.execute_command(op_makeLst, outFile, errFile)
 
         if not (self.path_buildFldr / self.str_testBinName).is_file():
             self.__writeStatus__("Terminated")
@@ -548,17 +555,17 @@ class CTestPkg():
 
         op_testRunLst.append(testAppPath)
         if self.b_silent:
-            op_testRunLst.append(">")
-            op_testRunLst.append(outF)
+            pass
 
-            op_testRunLst.append("2>")
-            op_testRunLst.append(errF)
         else:
-            op_testRunLst.append("-v")
-            op_testRunLst.append("-c")
+            pass
             print(10*'-' + '< ' + self.name + ' >' + 10*'-' + '\n')
 
-        intRetVal = subprocess.call(op_testRunLst, shell=True)
+        op_testRunLst.append("-v")
+        op_testRunLst.append("-c")
+            
+
+        intRetVal = self.execute_command(op_testRunLst, outF, errF)
 
         if self.b_silent:
             testResult = 0
@@ -597,7 +604,7 @@ class CTestPkg():
             covCmdLst.append("2>")
             covCmdLst.append("coverage.err")
             # print(covCmdLst)
-            subprocess.call(covCmdLst, shell=True, cwd=self.path_buildFldr)
+            self.execute_command(covCmdLst, cover_out, cover_err, CWD=self.path_buildFldr)
             lst_file, dict_covFile = tdd_support.interpretGCOV2lists(
                 cover_out, self.path_buildFldr)
             if not lst_file:
@@ -683,14 +690,10 @@ class CTestPkg():
             op_lst.append("-I")
             op_lst.append(str(self.path_buildFldr / ".." / self.str_srcFldr))
 
-            op_lst.append(">")
-            op_lst.append(check_out)
 
-            op_lst.append("2>")
-            op_lst.append(check_err)
 
-            # print(op_lst)
-            subprocess.call(op_lst, shell=True)
+            #print(op_lst)
+            self.execute_command(op_lst, check_out, check_err)
 
             numOfError = tdd_support.interpretCPPCHECKerrors(check_err)
             if numOfError != 0:
@@ -750,13 +753,7 @@ class CTestPkg():
             op_lst.append("-o")
             op_lst.append(lizardCsv)
 
-            op_lst.append(">")
-            op_lst.append(lizard_out)
-
-            op_lst.append("2>")
-            op_lst.append(lizard_err)
-
-            subprocess.call(op_lst, shell=True)
+            self.execute_command(op_lst, lizard_out, lizard_err)
 
             errTab = CodeStatistics.interpretLIZARDoutfile(
                 lizardCsv, int_McCabeCompl, int_ParCnt, int_FncLen)
@@ -794,7 +791,7 @@ class CTestPkg():
     def __writeStep__(self, step: str):
         self.str_step = step
         if not self.b_silent:
-            print(NewLine + Fore.YELLOW + self.str_step + Style.RESET_ALL)
+            print(Fore.YELLOW + self.str_step + Style.RESET_ALL)
         pass
 
     def __checkExternalTerminationCondition__(self):
