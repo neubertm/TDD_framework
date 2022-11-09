@@ -566,7 +566,6 @@ class CTestPkg():
             
 
         intRetVal = self.execute_command(op_testRunLst, outF, errF)
-
         if self.b_silent:
             testResult = 0
             if intRetVal <= 1 :
@@ -577,9 +576,14 @@ class CTestPkg():
                 self.str_testStatus = Fore.RED + "Fail" + Style.RESET_ALL
                 bRetVal = False
         else:
+            tdd_support.showContentOfTxtFile(outF)
             if not ( intRetVal in range(0,100) ):
                 print(Fore.RED + '\nSomething is rotten in (Denmark) that code.')
                 print('Test application terminate with this error: %i' % intRetVal)
+                print('***********************************************************')
+                print('  Print of error file:')
+                tdd_support.showContentOfTxtFile(errF)
+                print('***********************************************************')
                 print(Style.RESET_ALL)
         return(bRetVal)
 
@@ -599,10 +603,6 @@ class CTestPkg():
                 str(Path("CMakeFiles") / "TestApp.dir" / self.str_srcFldr))
             for sutCovListItem in sutList:
                 covCmdLst.append(str(Path(self.str_TpkgRoot, sutCovListItem)))
-            covCmdLst.append(">")
-            covCmdLst.append("coverage.out")
-            covCmdLst.append("2>")
-            covCmdLst.append("coverage.err")
             # print(covCmdLst)
             self.execute_command(covCmdLst, cover_out, cover_err, CWD=self.path_buildFldr)
             lst_file, dict_covFile = tdd_support.interpretGCOV2lists(

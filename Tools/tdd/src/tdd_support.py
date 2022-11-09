@@ -57,6 +57,10 @@ def my_callback(inp):
     #  print(readedChar)
 
 
+def showContentOfTxtFile(strFileName):
+    with open(strFileName, "r") as file:
+        print(file.read())
+
 def getSrcTestTempFolderName(testCfg: CTestConfig, mainCfg: CMainConfig, str_testType: str):
     """Function create string for temporary test folder."""
     toolchain_str = testCfg.co_testToolchain.str_compiler
