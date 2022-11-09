@@ -17,13 +17,19 @@ fi
 
 if [ ! -f "testSetups.ini" ]
 then
-  echo "Copy default test ini file.\(testSetup.ini\)"
+  echo "Copy default test ini file.\(testSetups.ini\)"
   cp Tools/defaults/testSetupsTemplate.ini testSetups.ini
+fi
+
+if [ ! -f "envPath.ini" ]
+then
+  echo "Copy default test ini file.\(envPath.ini\)"
+  cp Tools/defaults/envPathTemplate.ini envPath.ini
 fi
 
 if [ ! -f "bashEnvCfg.sh" ]
 then
-  echo "Copy default test ini file.\(testSetup.ini\)"
+  echo "Copy default test ini file.\(bashEnvCfg.sh\)"
   cp Tools/defaults/bashEnvCfgTemplate.sh bashEnvCfg.sh
 fi
 

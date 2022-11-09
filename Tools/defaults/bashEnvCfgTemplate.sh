@@ -33,7 +33,7 @@
 # EDIT HERE PLEASE
 # Note: If you do not have python3 in path uncomment next three lines and fill path to your python3
 ##################################################################################
-PYTHON=python3
+PYTHON3=python3
 
 
 ##################################################################################
