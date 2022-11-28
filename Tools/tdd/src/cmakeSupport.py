@@ -168,16 +168,14 @@ class CCMakeGenerator():
             )
 
     def writeToCMakefileUsageOfMemLeakDetectionMacros(self):
-        memLeakDetectionInclude = self.getPathToMemoryLeakDetectionMacros()
-        if 'cpputest' == self.testCfg.co_testToolchain.str_testlib:
-            # self.writeToFile('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%s' % str((memLeakDetectionInclude / "MemoryLeakDetectorNewMacros.h").as_posix())))
-            # self.writeToFile('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%s' % str((memLeakDetectionInclude / "MemoryLeakDetectorMallocMacros.h").as_posix())))
-            # self.writeToFile("SET(CMAKE_C_FLAGS  \"${CMAKE_C_FLAGS} -include %s\")\n\n" % ('%s' % str((memLeakDetectionInclude / "MemoryLeakDetectorMallocMacros.h").as_posix())))
-            self.writeToFile('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%s' % str((Path('..') / 'src' / "MemLeakDetectionNewMacros.h").as_posix()) ) )
-            self.writeToFile('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%s' % str((Path('..') / 'src' / "MemLeakDetectionMallocMacros.h").as_posix()) ) )
-            self.writeToFile("SET(CMAKE_C_FLAGS  \"${CMAKE_C_FLAGS} -include %s\")\n\n" % ('%s' % str((Path('..') / 'src' / "MemLeakDetectionMallocMacros.h").as_posix()) ) )
-        else:
-            assertUnexpectedBehavior('Wrong testlib %s' % (testCfg.co_testToolchain.str_testlib))
+        if self.testCfg.co_memLeakDetection.isMemoryLeakDetection:
+            memLeakDetectionInclude = self.getPathToMemoryLeakDetectionMacros()
+            if 'cpputest' == self.testCfg.co_testToolchain.str_testlib:
+                self.writeToFile('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%s' % str((Path('..') / 'src' / "MemLeakDetectionNewMacros.h").as_posix()) ) )
+                self.writeToFile('SET(CMAKE_CXX_FLAGS  \"${CMAKE_CXX_FLAGS} -include %s\")\n' % ('%s' % str((Path('..') / 'src' / "MemLeakDetectionMallocMacros.h").as_posix()) ) )
+                self.writeToFile("SET(CMAKE_C_FLAGS  \"${CMAKE_C_FLAGS} -include %s\")\n\n" % ('%s' % str((Path('..') / 'src' / "MemLeakDetectionMallocMacros.h").as_posix()) ) )
+            else:
+                assertUnexpectedBehavior('Wrong testlib %s' % (testCfg.co_testToolchain.str_testlib))
 
     def writeToCMakefileAddExecutableSection(self,tmpTestSrcFldr):
         # # open add_executable

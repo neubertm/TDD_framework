@@ -563,6 +563,18 @@ class CDebugConfig():
             if 'DEBUG_MODE' in BUILD_SEC:
                 self.isDebugConfigOn = StrToBool(BUILD_SEC['DEBUG_MODE'])
 
+class CMemoryLeakDetection():
+    isMemoryLeakDetection: bool
+
+    def __init__(self):
+        self.isMemoryLeakDetection = False
+
+    def _read_(self, CPS: ConfigParser):
+        if "MEMORY_LEAK_DETECTION" in CPS.keys():
+            MLD = CPS["MEMORY_LEAK_DETECTION"]
+            if "memory_leak_detection" in MLD:
+                self.isMemoryLeakDetection = StrToBool(MLD['memory_leak_detection'])
+
 
 class CTestConfig:
     SUT_dict: {str: str}
@@ -571,6 +583,7 @@ class CTestConfig:
     AUTOMOCKCPP_dict: {str: str}
     AUTOMOCKFLDRINC_lst: [str]
     co_debugconfig: CDebugConfig
+    co_memLeakDetection: CMemoryLeakDetection
     co_coverage: CCovCfg
     co_staticAnalysis: CStaticAnalysisCfg
     co_guidelineFormat: CFormaterGuidelineCheckerCfg
@@ -590,6 +603,7 @@ class CTestConfig:
         self.co_guidelineFormat = CFormaterGuidelineCheckerCfg()
         self.co_testToolchain = CTestToolchainCfg()
         self.co_codeStatistics = CCodeStatisticsCfg()
+        self.co_memLeakDetection = CMemoryLeakDetection()
 
     def readCfgFile(self, str_fName: str):
         CP = readAndFixTestConfigFile(str_fName)
@@ -617,6 +631,7 @@ class CTestConfig:
         self.co_guidelineFormat._read_(CPS)
         self.co_testToolchain._read_(CPS)
         self.co_codeStatistics._read_(CPS)
+        self.co_memLeakDetection._read_(CPS)
         # exit(0)
 
 
