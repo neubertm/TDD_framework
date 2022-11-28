@@ -99,6 +99,8 @@ class CCMakeGenerator():
             # i expect we can use very old version
         self.writeToCMakefileMinimalRequiredVersion(3.00)
 
+        self.writeToCMakeLanguageVersions()
+
             # Add switches to generate gcov files
         self.writeToCMakefileCoverageSection()
 
@@ -141,6 +143,14 @@ class CCMakeGenerator():
     def writeToCMakefileMinimalRequiredVersion(self,fNumber):
         self.writeToFile("cmake_minimum_required(VERSION %.2f)\n\n" % (fNumber))
 
+    def writeToCMakeLanguageVersions(self):
+        self.writeToFile(
+                'SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS}' + ' -std={}" )\n'.format(self.testCfg.co_testToolchain.str_cppVersion)
+        )
+        self.writeToFile(
+                'SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS}' + ' -std={}" )\n'.format(self.testCfg.co_testToolchain.str_cVersion)
+        )
+
     def writeToCMakefileCoverageSection(self):
         if self.testCfg.co_coverage.isTurnedOn:
             self.writeToFile(
@@ -151,7 +161,7 @@ class CCMakeGenerator():
                 'SET(GCC_COVERAGE_LINK_FLAGS    "-coverage -lgcov")' "\n")
             self.writeToFile(
                 'SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS}'
-                " ${GCC_COVERAGE_COMPILE_FLAGS} -std=c++11 -Wall -Werror"
+                " ${GCC_COVERAGE_COMPILE_FLAGS} -Wall -Werror"
                 ' -pedantic")\n'
             )
             self.writeToFile(

@@ -499,12 +499,16 @@ class CTestToolchainCfg(CBaseToolCfg):
     str_compiler: str
     str_testlib:  str
     str_automock: str
+    str_cppVersion: str
+    str_cVersion: str
 
     def __init__(self):
         CBaseToolCfg.__init__(self, "TOOLCHAIN")
         self.str_compiler = "gcc"
         self.str_testlib = "cpputest"
         self.str_automock = 'cppumockgen'
+        self.str_cppVersion = 'c++11'
+        self.str_cVersion = 'c11'
 
     def _read_(self, CPS: ConfigParser):
         if self.str_sectionName in CPS.keys():
@@ -515,6 +519,10 @@ class CTestToolchainCfg(CBaseToolCfg):
                 self.str_compiler = CPS_SEC['toolchain']
             if 'automock' in CPS_SEC:
                 self.str_automock = CPS_SEC['automock']
+            if 'cpp_version' in CPS_SEC:
+                self.str_cppVersion = CPS_SEC['cpp_version']
+            if 'c_version' in CPS_SEC:
+                self.str_cVersion = CPS_SEC['c_version']
 
 
 
