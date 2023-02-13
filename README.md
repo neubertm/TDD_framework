@@ -90,7 +90,11 @@ Is intended to allow this.
 14. Add precise configuration of showed tables. For summary test.
 
 ## Known problems
-1. In summary test cant be terminate test before its finished. 
+1. In summary test cant be terminate test before its finished.
+
+## Known bugs
+1. Code coverage result comprises STL header files.
+2. Code coverage result is refreshed in one direction only. Adding new unit test improves the result, deleting it has now effect. Result increases again after testpackage restart.
 
 ### Windows issues
 1. Windows(cmd) terminal windows could be sensitive to mouse action. Inserting content cause freezing but confirming(pressing enter) terminate test.
