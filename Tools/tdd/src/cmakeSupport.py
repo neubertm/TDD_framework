@@ -100,6 +100,7 @@ class CCMakeGenerator():
         self.writeToCMakefileMinimalRequiredVersion(3.00)
 
         self.writeToCMakeLanguageVersions()
+        self.writeToCMakeDebugConfig()
 
             # Add switches to generate gcov files
         self.writeToCMakefileCoverageSection()
@@ -151,23 +152,38 @@ class CCMakeGenerator():
                 'SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS}' + ' -std={}" )\n'.format(self.testCfg.co_testToolchain.str_cVersion)
         )
 
+    def writeToCMakeDebugConfig(self):
+        if self.testCfg.co_debugconfig.isDebugConfigOn :
+            self.writeToFile(
+                    'SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O0" )\n')
+            self.writeToFile(
+                    'SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -g -O0" )\n'
+            )
+
+
     def writeToCMakefileCoverageSection(self):
         if self.testCfg.co_coverage.isTurnedOn:
             self.writeToFile(
-                'SET(GCC_COVERAGE_COMPILE_FLAGS "-g -O0 -coverage'
+                'SET(GCC_COVERAGE_COMPILE_FLAGS "-coverage'
                 ' -fprofile-arcs -ftest-coverage")\n'
             )
             self.writeToFile(
-                'SET(GCC_COVERAGE_LINK_FLAGS    "-coverage -lgcov")' "\n")
+                'SET(GCC_COVERAGE_LINK_FLAGS    " -coverage -lgcov")' "\n")
             self.writeToFile(
-                'SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS}'
-                " ${GCC_COVERAGE_COMPILE_FLAGS} -Wall -Werror"
-                ' -pedantic")\n'
+                'SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}")\n'
             )
-            self.writeToFile(
-                'SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS}'
-                ' ${GCC_COVERAGE_COMPILE_FLAGS} -Wall -Werror -pedantic")\n'
-            )
+            # self.writeToFile(
+            #     'SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" "${GCC_COVERAGE_COMPILE_FLAGS}" )\n')
+            # self.writeToFile(
+            #     'SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS}'
+            #     " ${GCC_COVERAGE_COMPILE_FLAGS} -Wall -Werror"
+            #     ' -pedantic")\n'
+            # )
+	    # TODO add new configuration for this features
+            # self.writeToFile(
+            #     'SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS}'
+            #     ' ${GCC_COVERAGE_COMPILE_FLAGS} -Wall -Werror -pedantic")\n'
+            # )
             self.writeToFile('SET(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE ON)\n')
             self.writeToFile('SET(CMAKE_C_OUTPUT_EXTENSION_REPLACE ON)\n')
 

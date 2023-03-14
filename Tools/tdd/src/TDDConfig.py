@@ -563,7 +563,7 @@ class CDebugConfig():
     isDebugConfigOn: bool
 
     def __init__(self):
-        self.isDebugConfigOn = False
+        self.isDebugConfigOn = True
 
     def _read_(self, CPS: ConfigParser):
         if "BUILD_CONFIG" in CPS.keys():
