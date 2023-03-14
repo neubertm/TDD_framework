@@ -615,6 +615,10 @@ class CTestPkg():
                     #    "Some lines could be duplicite"
                     #    + " because c++ create multiple implementation of functions")
                 for file in dict_covFile:
+                    file_wo_gconv = '.'.join(file.split(".")[:-1])
+                    if file_wo_gconv not in sutFileNames:
+                        continue
+
                     lineLst = list(set(dict_covFile[file]))
                     lineLst.sort()
                     # res = []
@@ -624,8 +628,7 @@ class CTestPkg():
                     if lenOfLineLst != 0:
                         # strLineLst = ", ".join(res)
                         strLineLst = ", ".join(lineLst)
-                        print(Fore.LIGHTRED_EX + '.'.join(file.split(".")[
-                              :-1]) + " [ " + strLineLst + "]" + Style.RESET_ALL)
+                        print(Fore.LIGHTRED_EX + file_wo_gconv + " [ " + strLineLst + "]" + Style.RESET_ALL)
         else:
             self.str_uncoverage = Fore.YELLOW + "OFF" + Style.RESET_ALL
 
