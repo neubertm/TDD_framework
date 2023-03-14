@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CPrinter.h"
+class CPrinter;
 
 class CHuamaker {
 

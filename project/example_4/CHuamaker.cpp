@@ -1,9 +1,9 @@
 #include "CHuamaker.h"
-#include <stdlib.h>
+#include "CPrinter.h"
 
 // constructor
 CHuamaker::CHuamaker(void)
-  : po_mPrinter{NULL}
+  : po_mPrinter{nullptr}
 {
 }
 
@@ -16,7 +16,7 @@ CHuamaker::~CHuamaker(void)
 void CHuamaker::makeHua(unsigned int uint_pCount)
 {
 	// we already have a printer
-	if (NULL != po_mPrinter)
+	if (nullptr != po_mPrinter)
 	{
 		// let's hua :)
 		for (unsigned int i = 0; i < uint_pCount; i++)
