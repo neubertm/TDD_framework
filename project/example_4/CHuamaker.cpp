@@ -1,5 +1,6 @@
 #include "CHuamaker.h"
 #include <stdlib.h>
+#include <string>
 
 // constructor
 CHuamaker::CHuamaker(void)
@@ -15,6 +16,8 @@ CHuamaker::~CHuamaker(void)
 // make hua n times
 void CHuamaker::makeHua(unsigned int uint_pCount)
 {
+	std::string hua("hua ");
+	
 	// we already have a printer
 	if (NULL != po_mPrinter)
 	{
@@ -22,7 +25,7 @@ void CHuamaker::makeHua(unsigned int uint_pCount)
 		for (unsigned int i = 0; i < uint_pCount; i++)
 		{
 			// call printer
-			po_mPrinter->out("hua ");
+			po_mPrinter->out(hua.c_str());
 		}
 
 		// call printer
