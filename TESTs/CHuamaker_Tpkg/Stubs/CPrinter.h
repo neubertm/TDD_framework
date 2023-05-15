@@ -1,14 +1,15 @@
 #pragma once
 
+#include <string>
+
 class CPrinter {
 
  public:
 
 	// constructor
 	explicit CPrinter()
+	: savedOutput()
 	{
-		size = 0;
-		savedOutput[0] = 0;
 	}
 
 	// destruktor
@@ -19,12 +20,11 @@ class CPrinter {
 	// print
 	void out(const char *cs_pText);
 
-	char* getOutput();
+	const char *getOutput();
 
-	//this is part of autogenerate from  CPPUTEST_FRAMEWORK
 	private:
-	char savedOutput[1000];
-	unsigned int size;
+	
+	std::string savedOutput;
 
     CPrinter(const CPrinter&);
     CPrinter& operator=(const CPrinter&);
