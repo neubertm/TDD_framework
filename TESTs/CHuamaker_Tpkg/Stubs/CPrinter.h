@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CPrinter_H
+#define CPrinter_H
 
 #include <string>
 
@@ -30,3 +31,5 @@ class CPrinter {
     CPrinter& operator=(const CPrinter&);
 
 };
+
+#endif

@@ -1,0 +1,5 @@
+/**/*
+!/.gitignore
+!/build.bat
+!/build.sh
+!/CMakeLists.txt

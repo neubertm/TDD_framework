@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CPrinter_H
+#define CPrinter_H
 
 //void foo(void);
 
@@ -15,3 +16,5 @@ class CPrinter {
 	// print
 	void out(const char *cs_pText);
 };
+
+#endif
