@@ -17,15 +17,13 @@ SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -g -include ../src/MemLeakDetectionMallocMa
 add_executable(TestApp
 	${TPKG_DIR}/Stubs/CPrinter.cpp
 	${CMAKE_SOURCE_DIR}/HuaMaker/CHuamaker.cpp
-	#${CMAKE_SOURCE_DIR}/HuaMaker/CHuamaker.h
-	#${TPKG_DIR}/Stubs/CPrinter.h
 	${TPKG_DIR}/src/test.cpp
 	${TPKG_DIR}/src/AllTests.cpp
 	)
 
 include_directories(
-	#${TPKG_DIR}/Stubs
-	#${CMAKE_SOURCE_DIR}/HuaMaker
+	${TPKG_DIR}/Stubs
+	${CMAKE_SOURCE_DIR}/HuaMaker
 	${TDD_FRAMEWORK_ROOT_DIR}/Tools/testlibs/cpputest/include
 	)
 
