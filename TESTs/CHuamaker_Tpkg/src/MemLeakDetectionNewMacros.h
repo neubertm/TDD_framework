@@ -5,7 +5,11 @@
 // What is included here will be excluded from memory leak detection
 
 //example is here
-//#include <vector>
+#include <string>
+#include <map>
+#include <vector>
+#include <list>
+#include <deque>
 
 
 //This include is the last one.

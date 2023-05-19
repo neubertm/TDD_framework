@@ -1,6 +1,10 @@
 #include "CHuamaker.h"
 #include <stdlib.h>
 #include <string>
+#include <map>
+#include <vector>
+#include <list>
+#include <deque>
 
 // constructor
 CHuamaker::CHuamaker(void)
