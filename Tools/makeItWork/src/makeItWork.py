@@ -481,10 +481,14 @@ class TestingLibrary():
             termination()
 
         op += " -DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=ON"
+        #MK testing
+        op += " -DCMAKE_C_COMPILER=gcc"
+        op += " -DCMAKE_CXX_COMPILER=g++"
+        #end MK testing
         op += " >  " + os.path.join(bFldr, "cmake.out")  # stdout
         op += " 2> " + os.path.join(bFldr, "cmake.err")  # stderr
 
-        # print(op)
+        print(op)
         os.system(op)
 
     def __make__(self, bFldr, compiler="mingw"):
