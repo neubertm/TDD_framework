@@ -4,10 +4,10 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='mtdd',
-    version='0.0.3',
-    description='TDD framework',
-    packages=['mtdd'],
+    name='etdd',
+    version='0.0.11',
+    description='eTDD framework',
+    packages=['etdd'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
@@ -16,6 +16,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
     ],
+    url = "https://github.com/neubertm/TDD_framework",
     python_requires='>=3',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -30,5 +31,9 @@ setup(
         , 'jinja2'
         , 'colorama'
         , 'tabulate'
+        , 'console-menu'
+        , 'lizard'
+        , 'readchar'
+	    , 'gcovr'
     ]
 )
