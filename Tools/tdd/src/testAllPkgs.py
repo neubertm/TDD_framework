@@ -471,10 +471,9 @@ class CTestPkg():
 
         op_cmakeLst.append("-DCMAKELISTS_NAME=" + self.str_cmakeName)
         
-        #MK testing
-        op_cmakeLst.append("-DCMAKE_C_COMPILER=gcc")
-        op_cmakeLst.append("-DCMAKE_CXX_COMPILER=g++")
-        #end MK testing
+        if "mingw" == self.tCfg.co_testToolchain.str_compiler:
+            op_cmakeLst.append("-DCMAKE_C_COMPILER=gcc")
+            op_cmakeLst.append("-DCMAKE_CXX_COMPILER=g++")
         
         if self.b_silent:
             op_cmakeLst.append(">")
