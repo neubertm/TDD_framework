@@ -31,7 +31,7 @@
 
 from pathlib import Path
 
-RelVerNums = [0, 1, 0]
+RelVerNums = [0, 1, 1]
 
 def readWholeTextFileAsStrlist(filePath: Path):
     Lines = []
