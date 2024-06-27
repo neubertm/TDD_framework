@@ -481,6 +481,11 @@ class TestingLibrary():
             termination()
 
         op += " -DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=ON"
+
+        if "mingw" == compiler:
+            op += " -DCMAKE_C_COMPILER=gcc"
+            op += " -DCMAKE_CXX_COMPILER=g++"
+
         op += " >  " + os.path.join(bFldr, "cmake.out")  # stdout
         op += " 2> " + os.path.join(bFldr, "cmake.err")  # stderr
 

@@ -1,5 +1,5 @@
-Time_UTC:  2022-04-22 08:12:11
-Branch:  main
-Name:  Milan Neubert
-Email:  milan.neubert@siemens.com
-HASH: 525b5d79bdea013ea4a0fb5d2319df2015b0fe0a
+Time_UTC:  2024-06-05 13:26:08
+Branch:  MKr-fix-cmake-selecting-incorrect-compiler
+Name:  Martin Ruzek
+Email:  martin.ruzek@siemens.com
+HASH: 73fc1f42625d150628d9f7650be2c2be5ad9438f
