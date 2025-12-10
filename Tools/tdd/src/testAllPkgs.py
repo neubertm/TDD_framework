@@ -789,9 +789,14 @@ class CTestPkg():
             return(True)
 
     def __checkIniFileChanged__(self):
+        # Find test.ini file in the check list (it contains testcfgfilename like "test.ini")
+        testIniPath = str(self.path_TpkgRoot / self.mCfg.co_pkg.str_testcfgfilename)
+        if testIniPath not in self.LS_chckLFile:
+            return(False)
+        
         locdic_chckFiles = {
             chckF: os.stat(chckF).st_mtime for chckF in self.LS_chckLFile}
-        if locdic_chckFiles.get(self.LS_chckLFile[-1]) == self.dic_chckFiles.get(self.LS_chckLFile[-1]):
+        if locdic_chckFiles.get(testIniPath) == self.dic_chckFiles.get(testIniPath):
             return(False)
         else:
             return(True)
