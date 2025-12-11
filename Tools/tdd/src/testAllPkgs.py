@@ -518,11 +518,24 @@ class CTestPkg():
             return(False)
         return(True)
 
+    def __cleanCoverageData__(self):
+        """Remove old .gcda coverage data files to ensure fresh coverage results."""
+        if self.tCfg.co_coverage.isTurnedOn:
+            # Remove all .gcda files in build folder recursively
+            for gcda_file in self.path_buildFldr.rglob('*.gcda'):
+                try:
+                    gcda_file.unlink()
+                except Exception:
+                    pass  # Ignore errors if file cannot be deleted
+
     def __runTestBin__(self):
         bRetVal = True
         testAppPath = str(self.path_buildFldr / self.str_testBinName)
         outF = str(self.path_buildFldr / "testbin.out")
         errF = str(self.path_buildFldr / "testbin.err")
+
+        # Clean old coverage data before running tests
+        self.__cleanCoverageData__()
 
         self.__writeStep__("Test")
 

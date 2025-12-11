@@ -94,7 +94,6 @@ Is intended to allow this.
 
 ## Known bugs
 1. Code coverage result comprises STL header files.
-2. Code coverage result is refreshed in one direction only. Adding new unit test improves the result, deleting it has now effect. Result increases again after testpackage restart.
 
 ### Windows issues
 1. Windows(cmd) terminal windows could be sensitive to mouse action. Inserting content cause freezing but confirming(pressing enter) terminate test.
