@@ -109,8 +109,21 @@ def createSutList(testCfg: CTestConfig, mainCfg: CMainConfig, str_tType):
     tmpTstFolder = getSrcTestTempFolderName(testCfg, mainCfg, str_tType)
     sutList = []
     for key in sut:
-        keyPath = Path(key)
-        sutName = keyPath.name
+        # Get source file name from key
+        pathFileSrc = Path(key)
+        fileNameSrc = pathFileSrc.name
+        
+        # Get destination file name from value (might be renamed, e.g., .c => .cpp)
+        pathFileDst = Path(sut[key])
+        fileNameDst = pathFileDst.name
+        fileNameDstSuffix = pathFileDst.suffix
+        
+        # If destination has a filename (with suffix), use it; otherwise use source filename
+        if fileNameDstSuffix:
+            sutName = fileNameDst
+        else:
+            sutName = fileNameSrc
+            
         sutList.append(str(Path("..") / tmpTstFolder / sutName))
     return sutList
 

@@ -518,11 +518,24 @@ class CTestPkg():
             return(False)
         return(True)
 
+    def __cleanCoverageData__(self):
+        """Remove old .gcda coverage data files to ensure fresh coverage results."""
+        if self.tCfg.co_coverage.isTurnedOn:
+            # Remove all .gcda files in build folder recursively
+            for gcda_file in self.path_buildFldr.rglob('*.gcda'):
+                try:
+                    gcda_file.unlink()
+                except Exception:
+                    pass  # Ignore errors if file cannot be deleted
+
     def __runTestBin__(self):
         bRetVal = True
         testAppPath = str(self.path_buildFldr / self.str_testBinName)
         outF = str(self.path_buildFldr / "testbin.out")
         errF = str(self.path_buildFldr / "testbin.err")
+
+        # Clean old coverage data before running tests
+        self.__cleanCoverageData__()
 
         self.__writeStep__("Test")
 
@@ -789,9 +802,14 @@ class CTestPkg():
             return(True)
 
     def __checkIniFileChanged__(self):
+        # Find test.ini file in the check list (it contains testcfgfilename like "test.ini")
+        testIniPath = str(self.path_TpkgRoot / self.mCfg.co_pkg.str_testcfgfilename)
+        if testIniPath not in self.LS_chckLFile:
+            return(False)
+        
         locdic_chckFiles = {
             chckF: os.stat(chckF).st_mtime for chckF in self.LS_chckLFile}
-        if locdic_chckFiles.get(self.LS_chckLFile[-1]) == self.dic_chckFiles.get(self.LS_chckLFile[-1]):
+        if locdic_chckFiles.get(testIniPath) == self.dic_chckFiles.get(testIniPath):
             return(False)
         else:
             return(True)
