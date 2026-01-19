@@ -32,8 +32,37 @@
 
 
 import sys
+import os
 
 from pathlib import Path
+
+# Ensure system environment variables are set for Windows subprocess calls
+if os.name == 'nt':  # Windows only
+    if 'ComSpec' not in os.environ and 'SystemRoot' in os.environ:
+        os.environ['ComSpec'] = os.path.join(os.environ['SystemRoot'], 'system32', 'cmd.exe')
+    elif 'ComSpec' not in os.environ:
+        # Fallback if SystemRoot is also not set
+        os.environ['ComSpec'] = 'C:\\Windows\\system32\\cmd.exe'
+        os.environ['SystemRoot'] = 'C:\\Windows'
+
+# Monkey patch consolemenu to prevent crash on exit when environment variables are missing
+try:
+    import consolemenu.screen
+    
+    _original_clear = consolemenu.screen.Screen.clear
+    
+    def patched_clear(self=None):
+        """Patched clear method that handles missing environment variables gracefully."""
+        try:
+            _original_clear()
+        except (FileNotFoundError, OSError):
+            # If cls/clear fails, just skip it - terminal will still work
+            pass
+    
+    consolemenu.screen.Screen.clear = patched_clear
+except ImportError:
+    # consolemenu not installed yet, ignore
+    pass
 
 from TDDConfig import CEnvCfg
 from TDDConfig import CSetupsCfg
