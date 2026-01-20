@@ -1,5 +1,5 @@
-Time_UTC:  2025-12-15 17:10:48
-Branch:  MRu-bugfixing
+Time_UTC:  2026-01-20 09:29:20
+Branch:  MRu-py-3.14.2-support-fix
 Name:  Martin Ruzek
 Email:  martin.ruzek@siemens.com
-HASH: a0ac89455c924fe2dd30ccf695da0f2c42643968
+HASH: 5aa988ed04f175eda45d75f03716df5ba6afb8b6
