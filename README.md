@@ -28,7 +28,8 @@ Complete list of steps:
 Framework is written in Python3. So you have to install Python3 and during
 the installation allow to install package install(pip). It will be use for
 automatical installation of other packages.
-https://www.python.org/downloads/
+https://www.python.org/downloads/  
+Functionality tested with Python 3.14.2
 
 ## CMake installation
 Framework should be(in future) multiplatform and compiler independent. That is

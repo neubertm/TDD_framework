@@ -51,6 +51,20 @@ import cmakeSupport as CS
 env_bckp = os.environ.copy()
 
 
+# Wrapper for subprocess.call to ensure system environment variables are set (Python 3.14 compatibility)
+def _subprocess_call_safe(*args, **kwargs):
+    """Wrapper that ensures ComSpec and SystemRoot are set before calling subprocess."""
+    if os.name == 'nt' and kwargs.get('shell', False):
+        # Ensure system variables are set for Windows shell calls
+        if 'ComSpec' not in os.environ:
+            if 'SystemRoot' in os.environ:
+                os.environ['ComSpec'] = os.path.join(os.environ['SystemRoot'], 'system32', 'cmd.exe')
+            else:
+                os.environ['ComSpec'] = 'C:\\Windows\\system32\\cmd.exe'
+                os.environ['SystemRoot'] = 'C:\\Windows'
+    return subprocess.call(*args, **kwargs)
+
+
 def assertWithText(condition, text):
     '''
     Assertion wrapping function
@@ -483,7 +497,7 @@ class CTestPkg():
             op_cmakeLst.append(str(self.path_buildFldr / "cmake.err"))
 
         # print(op_cmakeLst)
-        subprocess.call(op_cmakeLst, shell=True)
+        _subprocess_call_safe(op_cmakeLst, shell=True)
 
     def __make__(self):
         self.__writeStep__("Makefile")
@@ -510,7 +524,7 @@ class CTestPkg():
             op_makeLst.append('2>')
             op_makeLst.append(str(self.path_buildFldr / "makefile.err"))
 
-        subprocess.call(op_makeLst, shell=True)
+        _subprocess_call_safe(op_makeLst, shell=True)
 
         if not (self.path_buildFldr / self.str_testBinName).is_file():
             self.__writeStatus__("Terminated")
@@ -553,7 +567,7 @@ class CTestPkg():
             op_testRunLst.append("-c")
             print(10*'-' + '< ' + self.name + ' >' + 10*'-' + '\n')
 
-        intRetVal = subprocess.call(op_testRunLst, shell=True)
+        intRetVal = _subprocess_call_safe(op_testRunLst, shell=True)
 
         if self.b_silent:
             testResult = 0
@@ -592,7 +606,7 @@ class CTestPkg():
             covCmdLst.append("2>")
             covCmdLst.append("coverage.err")
             # print(covCmdLst)
-            subprocess.call(covCmdLst, shell=True, cwd=self.path_buildFldr)
+            _subprocess_call_safe(covCmdLst, shell=True, cwd=self.path_buildFldr)
             lst_file, dict_covFile = tdd_support.interpretGCOV2lists(
                 cover_out, self.path_buildFldr)
             if not lst_file:
@@ -688,7 +702,7 @@ class CTestPkg():
             op_lst.append(check_err)
 
             # print(op_lst)
-            subprocess.call(op_lst, shell=True)
+            _subprocess_call_safe(op_lst, shell=True)
 
             numOfError = tdd_support.interpretCPPCHECKerrors(check_err)
             if numOfError != 0:
@@ -754,7 +768,7 @@ class CTestPkg():
             op_lst.append("2>")
             op_lst.append(lizard_err)
 
-            subprocess.call(op_lst, shell=True)
+            _subprocess_call_safe(op_lst, shell=True)
 
             errTab = CodeStatistics.interpretLIZARDoutfile(
                 lizardCsv, int_McCabeCompl, int_ParCnt, int_FncLen)
