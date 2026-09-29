@@ -32,6 +32,7 @@
 import threading
 import readchar
 import os
+import re
 import filecmp
 import subprocess
 from pathlib import Path
@@ -113,18 +114,12 @@ def createSutList(testCfg: CTestConfig, mainCfg: CMainConfig, str_tType):
         pathFileSrc = Path(key)
         fileNameSrc = pathFileSrc.name
         
-        # Get destination file name from value (might be renamed, e.g., .c => .cpp)
-        pathFileDst = Path(sut[key])
-        fileNameDst = pathFileDst.name
-        fileNameDstSuffix = pathFileDst.suffix
-        
-        # If destination has a filename (with suffix), use it; otherwise use source filename
-        if fileNameDstSuffix:
-            sutName = fileNameDst
-        else:
-            sutName = fileNameSrc
-            
-        sutList.append(str(Path("..") / tmpTstFolder / sutName))
+        # Destination may contain a subfolder (SRC_TEMP/inc) and/or a new name (e.g., .c => .cpp)
+        pathFileDst = Path(sut[key].replace("SRC_TEMP", tmpTstFolder))
+        if '' == pathFileDst.suffix:
+            pathFileDst = pathFileDst / fileNameSrc
+
+        sutList.append(str(Path("..") / pathFileDst))
     return sutList
 
 
@@ -308,21 +303,26 @@ def interpretCPPUTESToutput(resultFile: str):
     return statusTest
 
 
-def interpretCPPCHECKerrors(errorFile: str):
+def interpretCPPCHECKerrors(errorFile: str, sutFiles: [str]):
+    """Return list of cppcheck findings (multi-line strings) located in SUT files only."""
     with open(errorFile, "r") as File:
-        errData = File.read()
+        errLines = File.read().split("\n")
 
-    errLines = errData.split("\n")
-    # print(errLines)
+    sutPaths = {os.path.normcase(os.path.abspath(f)) for f in sutFiles}
+    headerRe = re.compile(r"^(.+?):\d+:\d+: (\w+)")
 
-    # remove Unmatched hit
-    errLines = [line for line in errLines if "Unmatched" not in line]
-    # print(errLines)
-    errLines = [line for line in errLines if line]  # remove empty lines
-    # print(errLines)
-    return int(len(errLines) / 3)
+    findings = []
+    for line in errLines:
+        if not line or "Unmatched" in line:
+            continue
+        match = headerRe.match(line)
+        if match and match.group(2) != "note":
+            findings.append([match.group(1), line])
+        elif findings:
+            findings[-1].append(line)
 
-    # errLines = list(filter(None, errLines))
+    return ["\n".join(f[1:]) for f in findings
+            if os.path.normcase(os.path.abspath(f[0])) in sutPaths]
 
 
 # define our clear function
