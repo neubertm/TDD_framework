@@ -580,8 +580,8 @@ class CTestPkg():
                 bRetVal = False
         else:
             if not ( intRetVal in range(0,100) ):
-                print(Fore.RED + '\nSomething is rotten in (Denmark) that code.')
-                print('Test application terminate with this error: %i' % intRetVal)
+                print(Fore.RED + '\nSomething went wrong.')
+                print('Test application terminated with this error: %i' % intRetVal)
                 print(Style.RESET_ALL)
         return(bRetVal)
 
@@ -689,8 +689,8 @@ class CTestPkg():
             # op_statCheck += "--std=c++11 "
             check_out = str(self.path_buildFldr / "cppcheck.out")
             check_err = str(self.path_buildFldr / "cppcheck.err")
-            for sutListItem in sutList:
-                op_lst.append(str(self.path_buildFldr / sutListItem))
+            sutPaths = [str(self.path_buildFldr / sutListItem) for sutListItem in sutList]
+            op_lst.extend(sutPaths)
 
             op_lst.append("-I")
             op_lst.append(str(self.path_buildFldr / ".." / self.str_srcFldr))
@@ -704,7 +704,8 @@ class CTestPkg():
             # print(op_lst)
             _subprocess_call_safe(op_lst, shell=True)
 
-            numOfError = tdd_support.interpretCPPCHECKerrors(check_err)
+            sutFindings = tdd_support.interpretCPPCHECKerrors(check_err, sutPaths)
+            numOfError = len(sutFindings)
             if numOfError != 0:
                 self.str_analysis = Fore.RED
             else:
@@ -716,8 +717,7 @@ class CTestPkg():
                 if numOfError:
                     numL = 40
                     print(numL*'-' + '\n')
-                    with open(check_err, 'r') as fin:
-                        print(fin.read())
+                    print("\n".join(sutFindings))
                     print(numL*'-')
         else:
             self.str_analysis = Fore.YELLOW + "OFF" + Style.RESET_ALL
