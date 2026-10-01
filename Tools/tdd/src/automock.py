@@ -104,7 +104,7 @@ class BasicFunction():
     name: str
     namespace: str
     retType: str
-    argsList: [(str,str)]
+    argsList: list[tuple[str, str]]
     declPreAtrib: str
     def __init__(self):
         self.name = ''
@@ -143,10 +143,9 @@ class CppClassInfo():
     rest: str
     int_classLable_s: int
     int_classLable_e: int
-    ctors: [CtorFunction]
-    dtors: [DtorFunction]
-    # innerClassLst: [CppClassInfo] python does not have forward declaration
-    innerClassLst: []
+    ctors: list[CtorFunction]
+    dtors: list[DtorFunction]
+    innerClassLst: list["CppClassInfo"]
 
     def __init__(self, str_fullHeader: str, classLbl_s=-1):
         self.fullHeader = str_fullHeader
@@ -392,7 +391,7 @@ class AutomockPostprocessor():
     strMock: str
     strHeader: str
     strPatchedMock: str
-    lstCppClassInfo: [CppClassInfo]
+    lstCppClassInfo: list[CppClassInfo]
 
     def __init__(self, pathHeader: Path, pathMock: Path):
         '''

@@ -24,12 +24,39 @@ Complete list of steps:
 4. Run start.bat
 
 
+## Command line usage
+`start.bat` can be started without parameters (interactive menu) or with one parameter
+for non-interactive runs, e.g. from CI or a script. It can be called from any folder.
+
+| Command | Behaviour | Exit code |
+|---|---|---|
+| `start.bat` | Interactive menu. | - |
+| `start.bat <Package_Tpkg>` | Runs one test package (e.g. `start.bat Monitor_Tpkg`) once and exits. The output is the same as in the interactive single test run (build, tests, coverage, static check, complexity). | `0` all unit tests pass, `1` a unit test fails, the package does not compile or does not exist |
+| `start.bat -a` | Runs all test packages in parallel. Prints only the names of packages that failed (one per line). | Number of failed packages (`0` = all pass) |
+
+Only the unit test result affects the exit code. Coverage, static analysis and complexity
+findings are reported but do not change it.
+
+Command line mode uses the same configuration files as the interactive mode. When there
+are more setup files (`*.tcfg`) in `Tools/TestConfigs`, `default.tcfg` is used.
+
+Example (cmd):
+```
+call test\start.bat -a
+if errorlevel 1 echo Some test packages failed.
+```
+
+Example (PowerShell):
+```
+cmd /c "test\start.bat Monitor_Tpkg"; $LASTEXITCODE
+```
+
+
 ## Python installation
 Framework is written in Python3. So you have to install Python3 and during
 the installation allow to install package install(pip). It will be use for
 automatical installation of other packages.
-https://www.python.org/downloads/  
-Functionality tested with Python 3.14.2
+https://www.python.org/downloads/
 
 ## CMake installation
 Framework should be(in future) multiplatform and compiler independent. That is

@@ -62,7 +62,7 @@ def stripStrName(str_name: str, int_maxLen=20):
 class MainMenu:
     co_env: CEnvCfg
     co_setups: CSetupsCfg
-    contentLst: []
+    contentLst: list[list]
     menu: ConsoleMenu
 
     def __init__(self, envCfg: CEnvCfg, setupCfg: CSetupsCfg):
