@@ -30,6 +30,14 @@ REM # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF T
 REM # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 REM ##################################################################################
 
+REM Usage: start.bat                 interactive menu
+REM        start.bat <Package_Tpkg>  run one package, exit 0 = unit tests pass, 1 = fail
+REM        start.bat -a              run all packages, print failed ones, exit = number of failed
+
+setlocal
+cd /d "%~dp0"
+set "TDD_ARG=%~1"
+
 if not exist winEnvCfg.bat (
   echo First run:
   echo     Creating winEnvCfg.bat file. Probably you have to fill it.
@@ -56,14 +64,19 @@ IF ERRORLEVEL 1 (
     ECHO The python is missing in path. Ensure it is installed and placed in your PATH.
     ECHO If you know where is your python installed but you do not want to update your PATH:
     ECHO Please open this winEnvCfg.bat and edit two lines and fill correct position for python3.exe
-    pause
-    EXIT /B
-) ELSE (
-    ECHO Python exists. Let's go!
+    IF NOT DEFINED TDD_ARG pause
+    EXIT /B 1
 )
+
+IF NOT DEFINED TDD_ARG GOTO interactive
+python -u Tools/tdd/src/autoTest.py "%TDD_ARG%"
+EXIT /B %ERRORLEVEL%
+
+:interactive
+ECHO Python exists. Let's go!
 
 title eTDD framework
 
-cd %~dp0 && python Tools/tdd/src/startTddTool.py
+python Tools/tdd/src/startTddTool.py
 
 REM pause

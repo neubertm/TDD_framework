@@ -56,8 +56,8 @@ def StrToBool(strVal: str):
 class CSetupsCfg:
     folder: str
     useAllSetups: bool
-    recognizeSetupSuffixes: [str]
-    userSpecifiedSetupFiles: [str]
+    recognizeSetupSuffixes: list[str]
+    userSpecifiedSetupFiles: list[str]
     showMenuEvenForOneSetup: bool
 
     def __init__(self):
@@ -358,7 +358,7 @@ class CTestPkgDescription:
 class CMainConfig:
 
     separ: str
-    hsuffix: []
+    hsuffix: list[str]
     co_env: CEnvCfg
     co_stat: CCodeStatParamMinValue
     co_pkg: CTestPkgDescription
@@ -383,7 +383,7 @@ class CMainConfig:
 
 
 class MainConfigsLists:
-    listOfMainCfg: [CMainConfig]
+    listOfMainCfg: list[CMainConfig]
 
     def __init__(self, str_syscfg):
         pass
@@ -432,7 +432,7 @@ class CStaticAnalysisCfg(CBaseToolCfg):
     str_ForcedLang: str
     str_c_version: str
     str_cpp_version: str
-    suppressionLst: [str]
+    suppressionLst: list[str]
 
     def __init__(self):
         CBaseToolCfg.__init__(self, "CHECKCODE")
@@ -560,11 +560,11 @@ class CDebugConfig():
 
 
 class CTestConfig:
-    SUT_dict: {str: str}
-    OTHER_dict: {str: str}
-    AUTOMOCK_dict: {str: str}
-    AUTOMOCKCPP_dict: {str: str}
-    AUTOMOCKFLDRINC_lst: [str]
+    SUT_dict: dict[str, str]
+    OTHER_dict: dict[str, str]
+    AUTOMOCK_dict: dict[str, str]
+    AUTOMOCKCPP_dict: dict[str, str]
+    AUTOMOCKFLDRINC_lst: list[str]
     co_debugconfig: CDebugConfig
     co_coverage: CCovCfg
     co_staticAnalysis: CStaticAnalysisCfg

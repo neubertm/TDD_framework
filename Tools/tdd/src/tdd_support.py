@@ -296,14 +296,16 @@ def interpretCPPUTESToutput(resultFile: str):
 
     resultSplit = resultData.split("\n")
 
+    # progress dots wrap every 50 tests, so the summary line position varies
     statusTest = False
-    if len(resultSplit) >= 2:
-        if resultSplit[1].split(" ")[0] == "OK":
+    for line in resultSplit:
+        if line.startswith("OK ("):
             statusTest = True
+            break
     return statusTest
 
 
-def interpretCPPCHECKerrors(errorFile: str, sutFiles: [str]):
+def interpretCPPCHECKerrors(errorFile: str, sutFiles: list[str]):
     """Return list of cppcheck findings (multi-line strings) located in SUT files only."""
     with open(errorFile, "r") as File:
         errLines = File.read().split("\n")

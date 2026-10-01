@@ -205,7 +205,7 @@ class CreateNewModule():
     str_COMPONENT_NAME: str
     str_SRC_TYPE: str
     str_TPKG_FOLDER: str
-    copyFileLst: [(str,str)]
+    copyFileLst: list[tuple[str, str]]
     testConfig: CTestConfig
     pkgDesc: CTestPkgDescription
 

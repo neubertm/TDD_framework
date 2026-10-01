@@ -126,10 +126,6 @@ def testOnePkg(pckgDir, mCfg):
     # revert environment varaiables
     resetEnvVariable()
 
-    print("Press any key to quit.\n")
-    # keyboard.read_key()
-    readchar.readkey()
-
 
 def debug(lstPackage, mainCfg):
     kpt = KeyPressThread.KeyboardThreadDbg()
@@ -354,11 +350,11 @@ class CTestPkg():
     b_silent: bool
     str_cmakeName: str
     b_infiniteRun: bool
-    LS_chckLFile: [str]
-    LS_srcL: [str]
-    LS_dstL: [str]
-    dic_chckFiles: {}
-    IncMockLst: []
+    LS_chckLFile: list[str]
+    LS_srcL: list[str]
+    LS_dstL: list[str]
+    dic_chckFiles: dict[str, float]
+    IncMockLst: list[str]
 
     def __init__(self, name, mainCfg, kpt):
         # super(CTestPkg, self).__init__(name=name)
@@ -579,13 +575,18 @@ class CTestPkg():
                 self.str_testStatus = Fore.RED + "Fail" + Style.RESET_ALL
                 bRetVal = False
         else:
+            # CppUTest returns the number of failed tests
+            if intRetVal == 0:
+                self.str_testStatus = Fore.GREEN + "Pass" + Style.RESET_ALL
+            else:
+                self.str_testStatus = Fore.RED + "Fail" + Style.RESET_ALL
             if not ( intRetVal in range(0,100) ):
                 print(Fore.RED + '\nSomething went wrong.')
                 print('Test application terminated with this error: %i' % intRetVal)
                 print(Style.RESET_ALL)
         return(bRetVal)
 
-    def __coverage__(self, sutList: [str], silent=True):
+    def __coverage__(self, sutList: list[str], silent=True):
         # if tdd_support.isCoverageEnabled(self.tCfg):
         if self.tCfg.co_coverage.isTurnedOn:
             self.__writeStep__("Coverage")
@@ -664,7 +665,7 @@ class CTestPkg():
         else:
             self.str_uncoverage = Fore.YELLOW + "OFF" + Style.RESET_ALL
 
-    def __staticCheck__(self, sutList: [str]):
+    def __staticCheck__(self, sutList: list[str]):
         if self.tCfg.co_staticAnalysis.isTurnedOn:
             self.__writeStep__("StaticCheck")
             op_lst = []
@@ -722,7 +723,7 @@ class CTestPkg():
         else:
             self.str_analysis = Fore.YELLOW + "OFF" + Style.RESET_ALL
 
-    def __codeAnalysis__(self, sutList: [str]):
+    def __codeAnalysis__(self, sutList: list[str]):
         if self.tCfg.co_codeStatistics.isTurnedOn:
             self.__writeStep__("Analysis")
 
@@ -926,7 +927,8 @@ class CTestPkg():
 
         while self.b_infiniteRun:
             self.__runTest__()
-        self.__writeStep__("Finished")
+        if self.str_step != "Finished":
+            self.__writeStep__("Finished")
         self.__writeStatus__("Terminated")
         # print("\n",self.name, " Finished!")
 

@@ -61,7 +61,7 @@ class TestMenu:
     co_env: CEnvCfg
     co_codeStatistics: CCodeStatParamMinValue
     co_pkg: CTestPkgDescription
-    contentLst: []
+    contentLst: list
     menu: ConsoleMenu
     obj_createModule: CreateNewModule
 
