@@ -72,6 +72,8 @@ def installPythonPackageCheckResult(outFile):
         pipData = File.read()
     pipLines = pipData.split("\n")
     pipLines = [line for line in pipLines if line]
+    if not pipLines:
+        return (False)
     result_lst = pipLines[-1].split(" ")
 
     # installed
@@ -95,7 +97,7 @@ def installPythonPackage(packageName):
     pip_err = os.path.join(tmp_folder, "pipinstall.err")
     checkPathToFile_orCreate(pip_out)
 
-    op_pip = "pip install " + packageName
+    op_pip = '"' + sys.executable + '" -m pip install ' + packageName
     op_pip += "  > " + pip_out
     op_pip += " 2> " + pip_err
 
@@ -481,6 +483,7 @@ class TestingLibrary():
             termination()
 
         op += " -DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=ON"
+        op += " -DCMAKE_POLICY_VERSION_MINIMUM=3.5"  # CppUTest 3.8 needs it for CMake >= 4
 
         if "mingw" == compiler:
             op += " -DCMAKE_C_COMPILER=gcc"
@@ -609,7 +612,7 @@ def checkPipVersion():
     pip_err = os.path.join(tmp_folder, "pip.err")
     checkPathToFile_orCreate(pip_out)
 
-    op_pip = "pip --version "
+    op_pip = '"' + sys.executable + '" -m pip --version '
     op_pip += "  > " + pip_out
     op_pip += " 2> " + pip_err
 
@@ -656,7 +659,7 @@ def checkCppcheck(Path=""):
     if bRetVal is True:
         print(Fore.GREEN + toolName.upper() + " ok. Version: " + strVersion)
         if not Path:
-            retPath = os.popen("where " + toolName).readlines().split("\n")[0]
+            retPath = os.popen("where " + toolName).read().split("\n")[0]
         else:
             retPath = Path
 
